@@ -1,0 +1,12 @@
+<resources>
+    <string name="app_name">Building Site Pathfinder</string>
+    <string name="width_label">Width</string>
+    <string name="height_label">Height</string>
+    <string name="height_default">5</string>
+    <string name="width_default">5</string>
+    <string name="solve">Find Path</string>
+    <string name="reset">Reset</string>
+    <string name="stop">STOP</string>
+    <string name="status">Status</string>
+
+</resources>
