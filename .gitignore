@@ -51,3 +51,6 @@ fabric.properties
 
 # Editor-based Rest Client
 .idea/httpRequests
+
+# Temporary Savings
+*__jb__old

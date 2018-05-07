@@ -1,13 +1,13 @@
 import time
-import rpi_sensors
+from rpi_sensors import RPiConfigs
 
 # variabile che permette di decidere se si vuole utilizzare il programma
 # come semplice simulazione, inserendo i valori a mano
 # oppure utilizzando i sensori collegati al Raspberry (configurato in precedenza).
 sensor_connected = True
 
-# lista dei parametri
-params = []
+# istanza della classe RaspberryConfigs
+rpi = RPiConfigs()
 
 # tolleranza
 moisture_range = 2
@@ -19,13 +19,13 @@ casting_read_delay = 3
 maturation_read_delay = 3
 
 # valori attesi durante il getto
-expected_moisture_casting = 10
-expected_temperature_casting = 10
+expected_moisture_casting = 70
+expected_temperature_casting = 22
 expected_pressure_casting = 10
 
 # valori attesi a maturazione
-expected_moisture_maturation = 5
-expected_temperature_maturation = 15
+expected_moisture_maturation = 50
+expected_temperature_maturation = 22
 expected_pressure_maturation = 20
 
 # valori rilevati
@@ -77,7 +77,7 @@ def check_pressure_maturation():
 
 # interroga i sensori del Rpi per aggiornare i valori dei parametri da monitorare
 def sensor_input_parameters():
-    # TODO aggiornamento parametri tramite lettura via Raspberry
+    # TODO trovare soluzione per sensore di pressione
     detected_moisture = input("Current moisture: ")
     detected_temperature = input("Current temperature: ")
     detected_pressure = input("Current pressure: ")
@@ -107,11 +107,12 @@ if __name__ == '__main__':
     while check_moisture_casting() or check_temperature_casting() or check_pressure_casting():
         print("Parameters at casting are not as expected\nMoisture: {}\nTemperature: {}\nPressure: {}\n".format(
             current_moisture, current_temperature, current_pressure))
+        # TODO comunicazione
         # invia dati a operatore -> ferma il getto
         # invia dati a DL
         # invia dati a centrale di betonaggio
 
-        # aggiornamento parametri da sensori
+        # aggiornamento parametri dai sensori
         current_moisture, current_temperature, current_pressure = update_parameters()
 
         # delay lettura casting
@@ -124,11 +125,12 @@ if __name__ == '__main__':
     while not check_moisture_maturation() or not check_temperature_maturation() or not check_pressure_maturation():
         print("Level of maturation required unsatisfied\nMoisture: {}\nTemperature: {}\nPressure: {}\n".format(
             current_moisture, current_temperature, current_pressure))
+        # TODO comunicazione
         # invia dati a operatore -> ferma il getto
         # invia dati a DL
         # invia dati a centrale di betonaggio
 
-        # aggiornamento parametri da sensori
+        # aggiornamento parametri dai sensori
         current_moisture, current_temperature, current_pressure = update_parameters()
 
         # delay lettura casting
