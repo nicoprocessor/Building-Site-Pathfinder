@@ -1,10 +1,23 @@
 import time
+import json
+import datetime
+import sys
+sys.path.insert(0, 'PathSolver Server/models/flowchart/rpi_sensors.py')
+
 from rpi_sensors import RPiConfigs
 
 # variabile che permette di decidere se si vuole utilizzare il programma
 # come semplice simulazione, inserendo i valori a mano
 # oppure utilizzando i sensori collegati al Raspberry (configurato in precedenza).
-sensor_connected = True
+sensor_connected = False
+
+# variabile che permette all'utente di decidere se salvare i dati registrati
+# in un file esterno fruibile successivamente
+log_data = True
+
+# in ogni caso inizializzo una lista per loggare i dati
+data = {}
+log = []
 
 # istanza della classe RaspberryConfigs
 rpi = RPiConfigs()
@@ -34,21 +47,6 @@ current_temperature = 0.0
 current_pressure = 0.0
 
 
-def update_moisture():
-    # TODO current_moisture = valore rilevato dal sensore
-    return float(current_moisture)
-
-
-def update_temperature():
-    # TODO current_temperature = valore rilevato dal sensore
-    return float(current_temperature)
-
-
-def update_pressure():
-    # TODO current_pressure = valore rilevato dal sensore
-    return float(current_pressure)
-
-
 # controllo parametri durante la gettata
 def check_moisture_casting():
     return current_moisture < abs(expected_moisture_casting - moisture_range)
@@ -75,20 +73,20 @@ def check_pressure_maturation():
     return current_pressure < abs(expected_pressure_maturation - pressure_range)
 
 
-# interroga i sensori del Rpi per aggiornare i valori dei parametri da monitorare
+# interroga i sensori del RaspberryPi per aggiornare i valori dei parametri da monitorare
 def sensor_input_parameters():
     # TODO trovare soluzione per sensore di pressione
-    detected_moisture = input("Current moisture: ")
-    detected_temperature = input("Current temperature: ")
-    detected_pressure = input("Current pressure: ")
+    detected_moisture = rpi.read_humidity()[1]
+    detected_temperature = rpi.read_temperature()[1]
+    detected_pressure = rpi.read_humidity()
     return detected_moisture, detected_temperature, detected_pressure
 
 
 # chiede di inserire manualmente i parametri da monitorare
 def user_input_parameters():
-    input_moisture = input("Current moisture: ")
-    input_temperature = input("Current temperature: ")
-    input_pressure = input("Current pressure: ")
+    input_moisture = input("Enter current moisture: ")
+    input_temperature = input("Enter current temperature: ")
+    input_pressure = input("Enter current pressure: ")
     return input_moisture, input_temperature, input_pressure
 
 
@@ -115,6 +113,10 @@ if __name__ == '__main__':
         # aggiornamento parametri dai sensori
         current_moisture, current_temperature, current_pressure = update_parameters()
 
+        # aggiorno il log
+        log.append({'phase': 'casting', 'timestamp': datetime.datetime.now(), 'moisture': current_moisture,
+                    'temperature': current_temperature, 'pressure': current_pressure})
+
         # delay lettura casting
         time.sleep(casting_read_delay)
 
@@ -133,6 +135,10 @@ if __name__ == '__main__':
         # aggiornamento parametri dai sensori
         current_moisture, current_temperature, current_pressure = update_parameters()
 
+        # aggiorno il log
+        log.append({'phase': 'maturation', 'timestamp': datetime.datetime.now(), 'moisture': current_moisture,
+                    'temperature': current_temperature, 'pressure': current_pressure})
+
         # delay lettura casting
         time.sleep(maturation_read_delay)
 
@@ -140,3 +146,13 @@ if __name__ == '__main__':
     print("Level of maturation required is satisfied. You can now remove the formwork.")
 
     # rimozione casseri
+
+    # salvataggio su file, se impostato
+    if log_data:
+        data['log'] = log
+
+        with open('data.json', 'w') as outfile:
+            json.dump(log, outfile)
+            print("Data saved succesfully!")
+    else:
+        print("Nothing saved!")
