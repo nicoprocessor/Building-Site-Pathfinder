@@ -2,7 +2,7 @@ import time
 import json
 import datetime
 import sys
-sys.path.insert(0, 'PathSolver Server/models/flowchart/rpi_sensors.py')
+sys.path.append('PathSolver Server/models/flowchart/')
 
 from rpi_sensors import RPiConfigs
 

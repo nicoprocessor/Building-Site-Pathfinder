@@ -5,6 +5,7 @@
       <option name="ignoredIdentifiers">
         <list>
           <option value="dht11" />
+          <option value="pathfinder" />
         </list>
       </option>
     </inspection_tool>

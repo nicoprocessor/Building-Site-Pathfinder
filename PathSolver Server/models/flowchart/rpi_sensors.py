@@ -3,7 +3,7 @@ import time
 import datetime
 import math
 
-sys.path.insert(0, 'PathSolver Server/models/flowchart/dht11.py')
+sys.path.append('PathSolver Server/models/flowchart/dht11.py')
 import RPi.GPIO as GPIO
 import dht11
 
