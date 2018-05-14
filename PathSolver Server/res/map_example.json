@@ -1,0 +1,32 @@
+{
+    "timestamp": 712646,
+    "rows": 10,
+    "cols": 10,
+    "map":[
+        {
+            "x": 0,
+            "y": 0,
+            "type": "traversable"
+        },
+        {
+            "x": 1,
+            "y": 0,
+            "type": "obstacle"
+        },
+        {
+            "x": 2,
+            "y": 0,
+            "type": "robot"
+        },
+        {
+            "x": 3,
+            "y": 0,
+            "type": "start"
+        },
+        {
+            "x": 3,
+            "y": 0,
+            "type": "end"
+        }
+    ]
+}

@@ -1,5 +1,5 @@
 import math
-from typing import Dict
+from typing import List, Any, Tuple
 from queue import PriorityQueue
 
 incremental_cost = 1
@@ -55,19 +55,6 @@ class Spot(object):
     def __str__(self):
         return "Spot at x:" + str(self.x) + " y:" + str(self.y)
 
-    def add_neighbors(self, grid):
-        """Evaluate neighbors for the given spot. A neighbor spot is any adjacent spot on
-            the grid to the actual spot such as the Manhattan distance is exactly 1.
-        """
-        if self.x < grid.cols - 1:
-            self.neighbors.append(grid[self.x + 1][self.y])
-        if self.x > 0:
-            self.neighbors.append(grid[self.x - 1][self.y])
-        if self.y < grid.rows - 1:
-            self.neighbors.append(grid[self.x][self.y + 1])
-        if self.y > 0:
-            self.neighbors.append(grid[self.x][self.y - 1])
-
 
 class CheckablePriorityQueue(PriorityQueue):
     """Extension of PriorityQueue class, add the functionality of membership test"""
@@ -77,25 +64,37 @@ class CheckablePriorityQueue(PriorityQueue):
             return item in self.queue
 
 
+# type aliases
+Path = List[Spot]
+
+
 class Grid(object):
     """A grid made of spots"""
 
-    def __init__(self, rows: int, cols: int, start_coord: Dict[str, int], end_coord: Dict[str, int]):
-        self.mesh = None
+    def __init__(self, start_coord: Any, end_coord: Any, rows: int = 10, cols: int = 10):
         self.rows = rows
         self.cols = cols
+        self.mesh = [None] * cols
+
         for i in range(rows):
             self.mesh[i] = [None] * cols
             for j in range(cols):
                 self.mesh[i][j] = Spot(i, j, spot_type_traversable)
 
+        # default values for starting position are [0,0] and [rows-1, cols-1]
+        if start_coord is None:
+            start_coord = {'x': 0, 'y': 0}
+        if end_coord is None:
+            end_coord = {'x': self.cols - 1, 'y': self.rows - 1}
+
+        # start_spot and end_spot expected format {'x': 0, 'y': 0}
         self.start_spot = Spot(start_coord['x'], start_coord['y'])
         self.end_spot = Spot(end_coord['x'], end_coord['y'])
 
         # fill neighbors
         for i in range(rows):
             for j in range(cols):
-                self.mesh[i][j].add_neighbors()
+                self.add_neighbors(self.mesh[i][j])
 
     def __str__(self):
         pass
@@ -103,9 +102,22 @@ class Grid(object):
     def __repr__(self):
         pass
 
-    @property
-    def a_star(self):
+    def add_neighbors(self, spot: Spot) -> None:
+        """Evaluate neighbors for the given spot. A neighbor spot is any adjacent spot on
+            the grid to the actual spot such as the Manhattan distance is exactly 1.
+        """
+        if spot.x < self.cols - 1:
+            spot.neighbors.append(self.mesh[spot.x + 1][spot.y])
+        if spot.x > 0:
+            spot.neighbors.append(self.mesh[spot.x - 1][spot.y])
+        if spot.y < self.rows - 1:
+            spot.neighbors.append(self.mesh[spot.x][spot.y + 1])
+        if spot.y > 0:
+            spot.neighbors.append(self.mesh[spot.x][spot.y - 1])
+
+    def a_star(self, alternatives: int = 1) -> Tuple[bool, Path]:
         """A* pathfinding algorithm"""
+        # TODO implement alternative path find
         path = []
         open_queue = CheckablePriorityQueue()
         closed_set = []

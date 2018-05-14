@@ -1,6 +1,14 @@
 import json
+from typing import List, Dict
+from pathfinder import Spot
 
-def path_to_dict():
+# type aliases
+Path = List[Spot]
+
+#
+
+
+def path_to_dict(path: Path) -> Dict[str, str]:
     pass
 
 
