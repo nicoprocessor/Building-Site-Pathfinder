@@ -2,16 +2,17 @@ import sys
 import time
 import datetime
 import math
+from typing import Tuple
 
-sys.path.append('PathSolver Server/models/flowchart/dht11.py')
 import RPi.GPIO as GPIO
 import dht11
 
 # tempo di attesa tra una lettura e la successiva in caso di letture non valide
 retry_delay = 1
 
-#numero massimo di tentativi per leggere correttamente prima di lanciare un errore
+# numero massimo di tentativi per leggere correttamente prima di lanciare un errore
 max_retry = 10
+
 
 class RPiConfigs(object):
 
@@ -25,9 +26,10 @@ class RPiConfigs(object):
         GPIO.cleanup()
 
     # read temperature in Celsius degrees from the sensor
-    def read_temperature(self):
+    @property
+    def read_temperature(self) -> Tuple[datetime.datetime, float]:
         # TODO migliorare questo controllo -> se il sensore non è in grado di
-        # TOOO realizzare una registrazione valida interrompere e restituire un codice di errore
+        # TODO realizzare una registrazione valida interrompere e restituire un codice di errore
         while True:
             result = self.moisture_sensor_instance.read()
             if result.is_valid():
@@ -36,7 +38,8 @@ class RPiConfigs(object):
                 time.sleep(retry_delay)
 
     # read relative humidity from the sensor
-    def read_humidity(self):
+    @property
+    def read_humidity(self) -> Tuple[datetime.datetime, float]:
         while True:
             result = self.moisture_sensor_instance.read()
             if result.is_valid():

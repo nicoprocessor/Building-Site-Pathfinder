@@ -53,7 +53,7 @@ class Spot(object):
         return "Spot at x:" + str(self.x) + " y:" + str(self.y)
 
     def __str__(self):
-        return "Spot at x:" + str(self.x) + " y:" + str(self.y)
+        return "Spot at x: {} y: {} type: {}".format(str(self.x), str(self.y), self.spot_type)
 
 
 class CheckablePriorityQueue(PriorityQueue):
@@ -97,7 +97,8 @@ class Grid(object):
                 self.add_neighbors(self.mesh[i][j])
 
     def __str__(self):
-        pass
+        return "Cols: {}\nRows: {}\nStart: {}\nEnd: {}\nMesh: {}".format(self.cols, self.rows, self.start_spot,
+                                                                         self.end_spot, self.mesh)
 
     def __repr__(self):
         pass
@@ -162,7 +163,7 @@ class Grid(object):
                                 open_queue.put(current_neighbor)
 
                             # update neighbor status
-                            current_neighbor.h = eval_heuristic(current_neighbor, end_spot)
+                            current_neighbor.h = eval_heuristic(current_neighbor, self.end_spot)
                             current_neighbor.f = current_neighbor.g + current_neighbor.h
                             current_neighbor.previous = current_spot
             else:
