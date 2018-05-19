@@ -81,6 +81,7 @@
         app:layout_constraintEnd_toStartOf="@+id/widthSpinner" />
 
     <LinearLayout
+        android:id="@+id/linearMain"
         android:layout_width="395dp"
         android:layout_height="458dp"
         android:layout_marginBottom="16dp"

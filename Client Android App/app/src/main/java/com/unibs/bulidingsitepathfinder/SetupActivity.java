@@ -18,7 +18,7 @@ public class SetupActivity extends AppCompatActivity implements AdapterView.OnIt
     private final int maxHeight = 10;
     private final int maxWidth = 10;
 
-//    private int selectedWidth, selectedHeight;
+    //    private int selectedWidth, selectedHeight;
     Spinner heightSpinner, widthSpinner;
 
     @Override
@@ -26,7 +26,7 @@ public class SetupActivity extends AppCompatActivity implements AdapterView.OnIt
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_setup);
 
-        LinearLayout lm = (LinearLayout) findViewById(R.id.linearMain);
+        LinearLayout lm = findViewById(R.id.linearMain);
 
         //Layout parameters used to display buttons
         LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
@@ -59,41 +59,36 @@ public class SetupActivity extends AppCompatActivity implements AdapterView.OnIt
             //Add button to LinearLayout defined in XML
             lm.addView(innerLayout);
         }
-    }
 
-    // Spinner element
-    heightSpinner = findViewById(R.id.heightSpinner);
+        // Spinner element
+        heightSpinner = findViewById(R.id.heightSpinner);
         heightSpinner.setOnItemSelectedListener(this);
 
-    widthSpinner = findViewById(R.id.widthSpinner);
+        widthSpinner = findViewById(R.id.widthSpinner);
         widthSpinner.setOnItemSelectedListener(this);
 
-    ArrayList<String> availableHeights = new ArrayList<>();
-    ArrayList<String> availableWeights = new ArrayList<>();
+        ArrayList<String> availableHeights = new ArrayList<>();
+        ArrayList<String> availableWeights = new ArrayList<>();
 
 
-        for(
-    int i = 2;
-    i<maxHeight +1;i++)
+        for (int i = 2; i < maxHeight + 1; i++)
             availableHeights.add(String.valueOf(i));
 
-        for(
-    int i = 2;
-    i<maxWidth +1;i++)
+        for (int i = 2; i < maxWidth + 1; i++)
             availableWeights.add(String.valueOf(i));
 
-    // Creating adapter for spinner
-    ArrayAdapter<String> dataAdapterHeights = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, availableHeights);
-    ArrayAdapter<String> dataAdapterWidths = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, availableWeights);
+        // Creating adapter for spinner
+        ArrayAdapter<String> dataAdapterHeights = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, availableHeights);
+        ArrayAdapter<String> dataAdapterWidths = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, availableWeights);
 
-    // Drop down layout style - list view with radio button
+        // Drop down layout style - list view with radio button
         dataAdapterHeights.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         dataAdapterWidths.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 
-    // attaching data adapter to spinner
+        // attaching data adapter to spinner
         heightSpinner.setAdapter(dataAdapterHeights);
         widthSpinner.setAdapter(dataAdapterWidths);
-}
+    }
 
     @Override
     public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {

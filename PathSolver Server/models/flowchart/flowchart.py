@@ -9,6 +9,7 @@ from typing import Tuple
 # oppure utilizzando i sensori collegati al Raspberry (configurato in precedenza).
 sensor_connected = False
 
+# importo la libreria per interfacciarsi con Rpi solo se non sto facendo una simulazione manuale
 if sensor_connected:
     from rpi_sensors import RPiConfigs
 
@@ -17,6 +18,8 @@ if sensor_connected:
 # variabile che permette all'utente di decidere se salvare i dati registrati
 # in un file esterno fruibile successivamente
 log_data = True
+file_suffix = ['short', 'full', 'test']
+
 
 # in ogni caso in inizializzo una lista per loggare i dati
 log_full = []  # report completo, ad alta frequenza di campionamento
@@ -104,11 +107,15 @@ def update_parameters() -> Tuple[float, float, float]:
 
 # main function
 if __name__ == '__main__':
+    # full_report_delay = 60
+    # short_report_delay = 300
 
     print(
         "Phase: casting\nExpected moisture casting: {}\nExpected temperature casting: {}\nExpected pressure casting: {}\n".format(
             expected_moisture_casting, expected_temperature_casting, expected_pressure_casting))
     current_moisture, current_temperature, current_pressure = update_parameters()
+
+    start_time = time.time()
 
     while check_moisture_casting() or check_temperature_casting() or check_pressure_casting():
         print("Parameters at casting are not as expected\nMoisture: {}\nTemperature: {}\nPressure: {}\n".format(
@@ -119,12 +126,25 @@ if __name__ == '__main__':
         # invia dati a DL
         # invia dati a centrale di betonaggio
 
+        # fermare il timer
+
         # aggiornamento parametri dai sensori
         current_moisture, current_temperature, current_pressure = update_parameters()
 
         # aggiorno il log
-        log_full.append({'phase': 'casting', 'timestamp': datetime.datetime.now(), 'moisture': current_moisture,
-                    'temperature': current_temperature, 'pressure': current_pressure})
+        log_full.append({'phase': 'casting','status': 'Bad' ,'timestamp': datetime.datetime.now(), 'moisture': current_moisture,
+                         'temperature': current_temperature, 'pressure': current_pressure})
+
+        end_time = time.time()
+        elapsed_time = end_time - start_time
+
+        if elapsed_time > full_report_delay:
+            #TODO salva su file Excel completo
+            pass
+
+        if elapsed_time > short_report_delay:
+            #TODO salva su file Excel riassuntivo
+            pass
 
         # delay lettura casting
         time.sleep(casting_read_delay)
@@ -140,7 +160,7 @@ if __name__ == '__main__':
         print("Level of maturation required unsatisfied\nMoisture: {}\nTemperature: {}\nPressure: {}\n".format(
             current_moisture, current_temperature, current_pressure))
 
-        # TODO comunicazione
+        # TODO communication with the right manager
         # invia dati a operatore -> ferma il getto
         # invia dati a DL
         # invia dati a centrale di betonaggio
@@ -148,13 +168,12 @@ if __name__ == '__main__':
         # aggiornamento parametri dai sensori
         current_moisture, current_temperature, current_pressure = update_parameters()
 
-        # aggiorno il log
+        # update full-log
         log_full.append({'phase': 'maturation', 'timestamp': datetime.datetime.now(), 'moisture': current_moisture,
-                    'temperature': current_temperature, 'pressure': current_pressure})
+                         'temperature': current_temperature, 'pressure': current_pressure})
 
-        # delay lettura casting
+        # read delay
         time.sleep(maturation_read_delay)
 
     # livello di maturazione raggiunto
-    # rimozione casseri
     print("Level of maturation required is satisfied. You can now remove the formwork.")
