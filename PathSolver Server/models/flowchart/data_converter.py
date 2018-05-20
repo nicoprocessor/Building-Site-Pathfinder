@@ -39,7 +39,7 @@ schemas = [
         'temperature': 'Temperatura getto',
         'moisture': 'Umidità getto',
         'pressure': 'Pressione getto',
-        'timestamp': 'Timestamp',
+        'record_timestamp': 'Record_TS',
         'BIM_id': 'BIM Object ID'
     }, {  # full
         'BIM_id': 'BIM Object ID',
@@ -73,6 +73,7 @@ def extract_data(log, file_detail):
 
         summarized_log['phase'] = phase
         summarized_log['timestamp'] = timestamp
+
     elif file_detail == file_suffix[1]:  # full
         begin_ts = log[0]['begin_timestamp']
         end_ts = log[-1]['end_timestamp']
@@ -129,8 +130,8 @@ def append_summary(log, file_detail: str):
     writer.save()
 
     # leave for debug purpose
-    # df_check = pd.read_excel(open(os.fspath(sheet_path), 'rb'), sheet_name='Sheet1')
-    # pprint(df_check)
+    df_check = pd.read_excel(open(os.fspath(sheet_path), 'rb'), sheet_name='Sheet1')
+    pprint(df_check)
 
 
 # main
