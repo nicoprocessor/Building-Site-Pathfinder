@@ -4,17 +4,6 @@ import datetime
 import data_converter
 from typing import Tuple
 
-# variabile che permette di decidere se si vuole utilizzare il programma
-# come semplice simulazione, inserendo i valori a mano
-# oppure utilizzando i sensori collegati al Raspberry (configurato in precedenza).
-sensor_connected = False
-
-# importo la libreria per interfacciarsi con Rpi solo se non sto facendo una simulazione manuale
-if sensor_connected:
-    from rpi_sensors import RPiConfigs
-
-    rpi = RPiConfigs()
-
 # variabile che permette all'utente di decidere se salvare i dati registrati
 # in un file esterno fruibile successivamente
 log_data = True
@@ -23,7 +12,7 @@ BIM_id = 'A'
 
 # in ogni caso in inizializzo una lista per loggare i dati
 log_full = []  # report completo, ad alta frequenza di campionamento
-log_report = []  # report sintetico
+log_short = []  # report sintetico
 
 # tolleranza
 moisture_range = 2
@@ -98,27 +87,37 @@ def user_input_parameters() -> Tuple[float, float, float]:
 
 
 # aggiorna i parametri da monitorare secondo il canale prestabilito (manuale da utente o automatico da sensori)
-def update_parameters() -> Tuple[float, float, float]:
-    if sensor_connected:
+def update_parameters(use_sensors=True) -> Tuple[float, float, float]:
+    if use_sensors:
         return sensor_input_parameters()
     else:
         return user_input_parameters()
 
 
 # main function
-if __name__ == '__main__':
+def monitoring_session(use_sensors: bool = True, log_data: bool = True, BIM_id: str = 'test'):
+    if use_sensors:
+        from rpi_sensors import RPiConfigs
+        rpi = RPiConfigs()
+
     # full_report_delay = 60
     # short_report_delay = 300
 
     print(
-        "Phase: casting\nExpected moisture casting: {}\nExpected temperature casting: {}\nExpected pressure casting: {}\n".format(
+        "Phase: casting\n"
+        "Expected moisture casting: {}\n"
+        "Expected temperature casting: {}\n"
+        "Expected pressure casting: {}\n".format(
             expected_moisture_casting, expected_temperature_casting, expected_pressure_casting))
-    current_moisture, current_temperature, current_pressure = update_parameters()
+    current_moisture, current_temperature, current_pressure = update_parameters(use_sensors)
 
     start_time = time.time()
 
     while check_moisture_casting() or check_temperature_casting() or check_pressure_casting():
-        print("Parameters at casting are not as expected\nMoisture: {}\nTemperature: {}\nPressure: {}\n".format(
+        print("Parameters at casting are not as expected\n"
+              "Moisture: {}\n"
+              "Temperature: {}\n"
+              "Pressure: {}\n".format(
             current_moisture, current_temperature, current_pressure))
 
         # TODO comunicazione
@@ -127,54 +126,150 @@ if __name__ == '__main__':
         # invia dati a centrale di betonaggio
 
         # aggiornamento parametri dai sensori
-        current_moisture, current_temperature, current_pressure = update_parameters()
+        current_moisture, current_temperature, current_pressure = update_parameters(use_sensors)
 
-        # aggiorno il log
-        log_full.append({'BIM_id': BIM_id, 'phase': 'casting', 'status': 'Bad', 'begin_timestamp': start_time,
-                         'end_timestamp': datetime.datetime.now(), 'moisture': current_moisture,
-                         'temperature': current_temperature, 'pressure': current_pressure})
+        # update log-full
+        log_full.append({'BIM_id': BIM_id,
+                         'phase': 'casting',
+                         'status': 'Bad',
+                         'begin_timestamp': start_time,
+                         'end_timestamp': datetime.datetime.now(),
+                         'moisture': current_moisture,
+                         'temperature': current_temperature,
+                         'pressure': current_pressure})
 
         end_time = time.time()
         elapsed_time = end_time - start_time
 
         # Salvataggio Excel
         if elapsed_time > full_report_delay:
-            # Salvataggio su file Excel completo
+            # Salvataggio su file Excel completo (full)
             data_converter.append_summary(log_full, file_detail=file_suffix[1])
+            log_full = []
 
         if elapsed_time > short_report_delay:
-            # TODO salva su file Excel riassuntivo
-
-            pass
+            # salvataggio su file Excel riassuntivo (short)
+            log_short.append({'BIM_id': BIM_id,
+                              'phase': 'casting',
+                              'status': 'Bad',
+                              'timestamp': end_time,
+                              'moisture': current_moisture,
+                              'temperature': current_temperature,
+                              'pressure': current_pressure})
+            data_converter.append_summary(log_short, file_detail=file_suffix[0])
+            log_short = []
 
         # delay lettura casting
         time.sleep(casting_read_delay)
 
     print("Parameters at casting are as expected. Moving to concrete maturation phase.")
-    print(
-        "Phase: maturation\nExpected moisture maturation: {}\nExpected temperature maturation: {}\nExpected pressure maturation: {}\n".format(
-            expected_moisture_maturation, expected_temperature_maturation, expected_pressure_maturation))
-    current_moisture, current_temperature, current_pressure = update_parameters()
+
+    # update data with the change of status
+    log_full.append({'BIM_id': BIM_id,
+                     'phase': 'casting',
+                     'status': 'OK',
+                     'begin_timestamp': start_time,
+                     'end_timestamp': datetime.datetime.now(),
+                     'moisture': current_moisture,
+                     'temperature': current_temperature,
+                     'pressure': current_pressure})
+    log_short.append({'BIM_id': BIM_id,
+                      'phase': 'casting',
+                      'status': 'OK',
+                      'timestamp': end_time,
+                      'moisture': current_moisture,
+                      'temperature': current_temperature,
+                      'pressure': current_pressure})
+
+    data_converter.append_summary(log_short, file_detail=file_suffix[0])
+    data_converter.append_summary(log_full, file_detail=file_suffix[1])
+    log_short = []
+    log_full = []
+
+    print("Phase: maturation\n"
+          "Expected moisture maturation: {}\n"
+          "Expected temperature maturation: {}\n"
+          "Expected pressure maturation: {}\n".format(
+        expected_moisture_maturation, expected_temperature_maturation, expected_pressure_maturation))
+
+    current_moisture, current_temperature, current_pressure = update_parameters(use_sensors)
 
     # monitoraggio post getto
     while check_moisture_maturation() or check_temperature_maturation() or check_pressure_maturation():
-        print("Level of maturation required unsatisfied\nMoisture: {}\nTemperature: {}\nPressure: {}\n".format(
+        print("Level of maturation required unsatisfied\n"
+              "Moisture: {}\n"
+              "Temperature: {}\n"
+              "Pressure: {}\n".format(
             current_moisture, current_temperature, current_pressure))
 
-        # TODO communication with the right manager
+        # TODO comunicazione
         # invia dati a operatore -> ferma il getto
         # invia dati a DL
         # invia dati a centrale di betonaggio
 
         # aggiornamento parametri dai sensori
-        current_moisture, current_temperature, current_pressure = update_parameters()
+        current_moisture, current_temperature, current_pressure = update_parameters(use_sensors)
 
         # update full-log
-        log_full.append({'phase': 'maturation', 'timestamp': datetime.datetime.now(), 'moisture': current_moisture,
-                         'temperature': current_temperature, 'pressure': current_pressure})
+        log_full.append({'BIM_id': BIM_id,
+                         'phase': 'maturation',
+                         'status': 'Bad',
+                         'begin_timestamp': start_time,
+                         'end_timestamp': datetime.datetime.now(),
+                         'moisture': current_moisture,
+                         'temperature': current_temperature,
+                         'pressure': current_pressure})
+
+        end_time = time.time()
+        elapsed_time = end_time - start_time
+
+        # Salvataggio Excel
+        if elapsed_time > full_report_delay:
+            # Salvataggio su file Excel completo (full)
+            data_converter.append_summary(log_full, file_detail=file_suffix[1])
+            log_full = []
+
+        if elapsed_time > short_report_delay:
+            # salvataggio su file Excel riassuntivo (short)
+            log_short.append({'BIM_id': BIM_id,
+                              'phase': 'maturation',
+                              'status': 'Bad',
+                              'timestamp': end_time,
+                              'moisture': current_moisture,
+                              'temperature': current_temperature,
+                              'pressure': current_pressure})
+            data_converter.append_summary(log_short, file_detail=file_suffix[0])
+            log_short = []
 
         # read delay
         time.sleep(maturation_read_delay)
 
     # livello di maturazione raggiunto
     print("Level of maturation required is satisfied. You can now remove the formwork.")
+
+    # update data with the change of status
+    log_full.append({'BIM_id': BIM_id,
+                     'phase': 'maturation',
+                     'status': 'OK',
+                     'begin_timestamp': start_time,
+                     'end_timestamp': datetime.datetime.now(),
+                     'moisture': current_moisture,
+                     'temperature': current_temperature,
+                     'pressure': current_pressure})
+    log_short.append({'BIM_id': BIM_id,
+                      'phase': 'maturation',
+                      'status': 'OK',
+                      'timestamp': end_time,
+                      'moisture': current_moisture,
+                      'temperature': current_temperature,
+                      'pressure': current_pressure})
+
+    data_converter.append_summary(log_short, file_detail=file_suffix[0])
+    data_converter.append_summary(log_full, file_detail=file_suffix[1])
+    log_short = []
+    log_full = []
+
+
+if __name__ == '__main__':
+    monitoring_session()
+
