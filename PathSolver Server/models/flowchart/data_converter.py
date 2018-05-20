@@ -98,7 +98,7 @@ def convert_dict_keys(old_dict, conversion_table):
     return converted_dict
 
 
-def append_summary(log, file_detail: str):
+def append_summary(log: List[Any], file_detail: str):
     """Generates and writes the summarized line on the full log file"""
     # Setting the right path to the spreadsheet
     sheet_path = pathlib.Path.cwd().parent.parent.joinpath('res', 'report-' + file_detail + '-test.xlsx')
@@ -107,7 +107,7 @@ def append_summary(log, file_detail: str):
     # Loading previous Excel data into dataframe
     xl_df = pd.read_excel(open(os.fspath(sheet_path), 'rb'), sheet_name='Sheet1')
 
-    # data pre processing, summarize the list of dicts in a single dict
+    # data pre-processing, summarize the list of dicts in a single dict
     summarized_log = extract_data(log, file_detail)
     log_list = []
 
@@ -133,43 +133,42 @@ def append_summary(log, file_detail: str):
     df_check = pd.read_excel(open(os.fspath(sheet_path), 'rb'), sheet_name='Sheet1')
     pprint(df_check)
 
-
 # main
-if __name__ == '__main__':
-    # test
-    time_series = np.sort(list(map(lambda x: round(x, 3), np.random.random(18))))
-    # full
-    d1f = [{'BIM_id': 'A', 'temperature': 10, 'moisture': 20, 'pressure': 10, 'begin_timestamp': 0, 'end_timestamp': 0},
-           {'BIM_id': 'A', 'temperature': 12, 'moisture': 22, 'pressure': 20, 'begin_timestamp': 0, 'end_timestamp': 0},
-           {'BIM_id': 'A', 'temperature': 12, 'moisture': 22, 'pressure': 20, 'begin_timestamp': 0, 'end_timestamp': 0}]
-    d2f = [{'BIM_id': 'A', 'temperature': 20, 'moisture': 50, 'pressure': 20, 'begin_timestamp': 0, 'end_timestamp': 0},
-           {'BIM_id': 'A', 'temperature': 22, 'moisture': 52, 'pressure': 20, 'begin_timestamp': 0, 'end_timestamp': 0}]
+# if __name__ == '__main__':
+# # test
+# time_series = np.sort(list(map(lambda x: round(x, 3), np.random.random(18))))
+# # full
+# d1f = [{'BIM_id': 'A', 'temperature': 10, 'moisture': 20, 'pressure': 10, 'begin_timestamp': 0, 'end_timestamp': 0},
+#        {'BIM_id': 'A', 'temperature': 12, 'moisture': 22, 'pressure': 20, 'begin_timestamp': 0, 'end_timestamp': 0},
+#        {'BIM_id': 'A', 'temperature': 12, 'moisture': 22, 'pressure': 20, 'begin_timestamp': 0, 'end_timestamp': 0}]
+# d2f = [{'BIM_id': 'A', 'temperature': 20, 'moisture': 50, 'pressure': 20, 'begin_timestamp': 0, 'end_timestamp': 0},
+#        {'BIM_id': 'A', 'temperature': 22, 'moisture': 52, 'pressure': 20, 'begin_timestamp': 0, 'end_timestamp': 0}]
 
-    # short
-    d1s = [{'BIM_id': 'A', 'phase': 'Bad', 'temperature': 10, 'moisture': 20, 'pressure': 10, 'timestamp': 0},
-           {'BIM_id': 'A', 'phase': 'Bad', 'temperature': 12, 'moisture': 22, 'pressure': 20, 'timestamp': 0},
-           {'BIM_id': 'A', 'phase': 'Bad', 'temperature': 12, 'moisture': 22, 'pressure': 20, 'timestamp': 0}]
-    d2s = [{'BIM_id': 'A', 'phase': 'Bad', 'temperature': 20, 'moisture': 50, 'pressure': 20, 'timestamp': 0},
-           {'BIM_id': 'A', 'phase': 'Bad', 'temperature': 22, 'moisture': 52, 'pressure': 20, 'timestamp': 0}]
+# # short
+# d1s = [{'BIM_id': 'A', 'phase': 'Bad', 'temperature': 10, 'moisture': 20, 'pressure': 10, 'timestamp': 0},
+#        {'BIM_id': 'A', 'phase': 'Bad', 'temperature': 12, 'moisture': 22, 'pressure': 20, 'timestamp': 0},
+#        {'BIM_id': 'A', 'phase': 'Bad', 'temperature': 12, 'moisture': 22, 'pressure': 20, 'timestamp': 0}]
+# d2s = [{'BIM_id': 'A', 'phase': 'Bad', 'temperature': 20, 'moisture': 50, 'pressure': 20, 'timestamp': 0},
+#        {'BIM_id': 'A', 'phase': 'Bad', 'temperature': 22, 'moisture': 52, 'pressure': 20, 'timestamp': 0}]
+#
+# data_f = [d1f, d2f]
+# data_s = [d1s, d2s]
+# counter = 0
+#
+# for i in range(len(data_s)):
+#     l = data_s[i]
+#     for d_index in range(len(l)):
+#         l[d_index]['timestamp'] = time_series[counter]
+#         counter += 1
 
-    data_f = [d1f, d2f]
-    data_s = [d1s, d2s]
-    counter = 0
+# for i in range(len(data_f)):
+#     l = data_f[i]
+#     for d_index in range(len(l)):
+#         l[d_index]['begin_timestamp'] = time_series[counter]
+#         counter += 1
+#         l[d_index]['end_timestamp'] = time_series[counter]
+#         counter += 1
 
-    for i in range(len(data_s)):
-        l = data_s[i]
-        for d_index in range(len(l)):
-            l[d_index]['timestamp'] = time_series[counter]
-            counter += 1
-
-    # for i in range(len(data_f)):
-    #     l = data_f[i]
-    #     for d_index in range(len(l)):
-    #         l[d_index]['begin_timestamp'] = time_series[counter]
-    #         counter += 1
-    #         l[d_index]['end_timestamp'] = time_series[counter]
-    #         counter += 1
-
-    append_summary(d1s, file_detail='short')
-    # append_summary(d2s, file_detail='short')
-    # append_summary(d2, file_detail='full')
+# append_summary(d1s, file_detail='short')
+# append_summary(d2s, file_detail='short')
+# append_summary(d2, file_detail='full')
