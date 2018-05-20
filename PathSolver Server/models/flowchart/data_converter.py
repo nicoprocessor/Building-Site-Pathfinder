@@ -13,32 +13,42 @@ from typing import Dict, Any, List, NewType
 # Report_short_schema = Dict[str, float, float, float, Timestamp]
 
 # Utility constants
-file_suffix = ['short', 'full', 'test']
+file_suffix = ['short', 'full']
 float_precision = 3
 
 # dictionaries to convert dict names to xl naming conventions
 schemas = [
     {  # short
-        'BIM_id': 'B3F ID',
+        'B3F_id': 'B3F ID',
+        'name': 'Name',
+        'type': 'Type',
+        'desc': 'Description',
+        'loc': 'Location Path',
+        'cls': 'Classe di Resistenza CLS',
+        'status': 'Status',
+        'n_issues': '# Issues',
+        'n_open_issues': '# Open Issues',
+        'n_checklists': '# Checklists',
+        'n_open_checklists': '# Open Checklists',
+        'date_created': 'Date Created',
+        'contractor': 'Appaltatore',
+        'completion_percentage': 'Percentuale di Completamento',
+        'pillar_number': 'n° pilasto',
+        'superficial_quality': 'Qualità superficiale getto',
+        'phase': 'Fase',
         'temperature': 'Temperatura getto',
         'moisture': 'Umidità getto',
         'pressure': 'Pressione getto',
-        'timestamp': 'Timestamp'
+        'timestamp': 'Timestamp',
+        'BIM_id': 'BIM Object ID'
     }, {  # full
         'BIM_id': 'BIM Object ID',
         'temperature': 'Temperatura getto',
         'moisture': 'Umidità getto',
         'pressure': 'Pressione getto',
         'phase': 'Fase',
-        'status': 'Stato',
         'begin_timestamp': 'Begin_TS',
         'end_timestamp': 'End_TS'
-    }, {  # test
-        'BIM_id': 'BIM Object ID',
-        'temperature': 'Temperatura getto',
-        'moisture': 'Umidità getto',
-        'pressure': 'Pressione getto',
-        'timestamp': 'Timestamp'
     }]
 
 
@@ -58,20 +68,18 @@ def extract_data(log, file_detail):
     summarized_log['pressure'] = round(avg_pressure, float_precision)
 
     if file_detail == file_suffix[0]:  # short
-        status = log[-1]['status']
         phase = log[-1]['phase']
         timestamp = log[-1]['timestamp']
 
-        summarized_log['status'] = status
         summarized_log['phase'] = phase
         summarized_log['timestamp'] = timestamp
     elif file_detail == file_suffix[1]:  # full
-        begin_ts = log[-1]['begin_timestamp']
+        begin_ts = log[0]['begin_timestamp']
         end_ts = log[-1]['end_timestamp']
 
         summarized_log['begin_timestamp'] = begin_ts
         summarized_log['end_timestamp'] = end_ts
-    return dict(summarized_log)
+    return summarized_log
 
 
 def convert_dict_keys(old_dict, conversion_table):
@@ -86,14 +94,14 @@ def convert_dict_keys(old_dict, conversion_table):
         except KeyError:
             # if the key is not contained in the conversion table, drop that element
             continue
-    return dict(converted_dict)
+    return converted_dict
 
 
 def append_summary(log, file_detail: str):
     """Generates and writes the summarized line on the full log file"""
     # Setting the right path to the spreadsheet
-    sheet_path = pathlib.Path.cwd().parent.parent.joinpath('res', 'report-' + file_detail + '.xlsx')
-    print("Updating file at: " + os.fspath(sheet_path))
+    sheet_path = pathlib.Path.cwd().parent.parent.joinpath('res', 'report-' + file_detail + '-test.xlsx')
+    # print("Updating file at: " + os.fspath(sheet_path))
 
     # Loading previous Excel data into dataframe
     xl_df = pd.read_excel(open(os.fspath(sheet_path), 'rb'), sheet_name='Sheet1')
@@ -109,44 +117,58 @@ def append_summary(log, file_detail: str):
 
     # Update previous dataframe with the new row
     new_row = pd.DataFrame.from_dict(log_list)
-    xl_df = pd.concat([xl_df, new_row])
-    pprint(xl_df)
+    new_df = pd.concat([xl_df, new_row], ignore_index=True)
+
+    # Avoid sorting columns when concatenating dataframes
+    new_df = new_df.reindex_axis(xl_df.columns, axis=1)
+    # pprint(new_df)
 
     # Write update dataframe to Excel spreadsheet
     writer = pd.ExcelWriter(os.fspath(sheet_path))
-    xl_df.to_excel(writer, 'Sheet1', index=False)
+    new_df.to_excel(writer, 'Sheet1', index=False)
     writer.save()
 
-    # # leave for debug purpose
-    df_check = pd.read_excel(open(os.fspath(sheet_path), 'rb'), sheet_name='Sheet1')
-    pprint(df_check)
+    # leave for debug purpose
+    # df_check = pd.read_excel(open(os.fspath(sheet_path), 'rb'), sheet_name='Sheet1')
+    # pprint(df_check)
 
 
 # main
 if __name__ == '__main__':
-    time_series = np.sort(list(map(lambda x:round(x,3), np.random.random(18))))
+    # test
+    time_series = np.sort(list(map(lambda x: round(x, 3), np.random.random(18))))
+    # full
+    d1f = [{'BIM_id': 'A', 'temperature': 10, 'moisture': 20, 'pressure': 10, 'begin_timestamp': 0, 'end_timestamp': 0},
+           {'BIM_id': 'A', 'temperature': 12, 'moisture': 22, 'pressure': 20, 'begin_timestamp': 0, 'end_timestamp': 0},
+           {'BIM_id': 'A', 'temperature': 12, 'moisture': 22, 'pressure': 20, 'begin_timestamp': 0, 'end_timestamp': 0}]
+    d2f = [{'BIM_id': 'A', 'temperature': 20, 'moisture': 50, 'pressure': 20, 'begin_timestamp': 0, 'end_timestamp': 0},
+           {'BIM_id': 'A', 'temperature': 22, 'moisture': 52, 'pressure': 20, 'begin_timestamp': 0, 'end_timestamp': 0}]
 
-    d1 = [{'BIM_id': 'A', 'temperature': 10, 'moisture': 20, 'pressure': 10, 'begin_timestamp': 0, 'end_timestamp': 0},
-          {'BIM_id': 'A', 'temperature': 12, 'moisture': 22, 'pressure': 20, 'begin_timestamp': 0, 'end_timestamp': 0},
-          {'BIM_id': 'A', 'temperature': 12, 'moisture': 22, 'pressure': 20, 'begin_timestamp': 0, 'end_timestamp': 0}]
-    d2 = [{'BIM_id': 'A', 'temperature': 20, 'moisture': 50, 'pressure': 20, 'begin_timestamp': 0, 'end_timestamp': 0},
-          {'BIM_id': 'A', 'temperature': 22, 'moisture': 52, 'pressure': 20, 'begin_timestamp': 0, 'end_timestamp': 0},
-          {'BIM_id': 'A', 'temperature': 22, 'moisture': 54, 'pressure': 20, 'begin_timestamp': 0, 'end_timestamp': 0}]
-    d3 = [{'BIM_id': 'A', 'temperature': 20, 'moisture': 60, 'pressure': 20, 'begin_timestamp': 0, 'end_timestamp': 0},
-          {'BIM_id': 'A', 'temperature': 22, 'moisture': 67, 'pressure': 22, 'begin_timestamp': 0, 'end_timestamp': 0},
-          {'BIM_id': 'A', 'temperature': 22, 'moisture': 68, 'pressure': 24, 'begin_timestamp': 0, 'end_timestamp': 0}]
+    # short
+    d1s = [{'BIM_id': 'A', 'phase': 'Bad', 'temperature': 10, 'moisture': 20, 'pressure': 10, 'timestamp': 0},
+           {'BIM_id': 'A', 'phase': 'Bad', 'temperature': 12, 'moisture': 22, 'pressure': 20, 'timestamp': 0},
+           {'BIM_id': 'A', 'phase': 'Bad', 'temperature': 12, 'moisture': 22, 'pressure': 20, 'timestamp': 0}]
+    d2s = [{'BIM_id': 'A', 'phase': 'Bad', 'temperature': 20, 'moisture': 50, 'pressure': 20, 'timestamp': 0},
+           {'BIM_id': 'A', 'phase': 'Bad', 'temperature': 22, 'moisture': 52, 'pressure': 20, 'timestamp': 0}]
 
-    data = [d1, d2, d3]
+    data_f = [d1f, d2f]
+    data_s = [d1s, d2s]
     counter = 0
 
-    for i in range(len(data)):
-        l = data[i]
+    for i in range(len(data_s)):
+        l = data_s[i]
         for d_index in range(len(l)):
-            l[d_index]['begin_timestamp'] = time_series[counter]
-            counter += 1
-            l[d_index]['end_timestamp'] = time_series[counter]
+            l[d_index]['timestamp'] = time_series[counter]
             counter += 1
 
-    append_summary(d1, file_detail='full')
-    append_summary(d2, file_detail='full')
-    append_summary(d3, file_detail='full')
+    # for i in range(len(data_f)):
+    #     l = data_f[i]
+    #     for d_index in range(len(l)):
+    #         l[d_index]['begin_timestamp'] = time_series[counter]
+    #         counter += 1
+    #         l[d_index]['end_timestamp'] = time_series[counter]
+    #         counter += 1
+
+    append_summary(d1s, file_detail='short')
+    # append_summary(d2s, file_detail='short')
+    # append_summary(d2, file_detail='full')

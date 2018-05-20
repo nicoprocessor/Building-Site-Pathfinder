@@ -19,7 +19,7 @@ if sensor_connected:
 # in un file esterno fruibile successivamente
 log_data = True
 file_suffix = ['short', 'full', 'test']
-
+BIM_id = 'A'
 
 # in ogni caso in inizializzo una lista per loggare i dati
 log_full = []  # report completo, ad alta frequenza di campionamento
@@ -126,24 +126,25 @@ if __name__ == '__main__':
         # invia dati a DL
         # invia dati a centrale di betonaggio
 
-        # fermare il timer
-
         # aggiornamento parametri dai sensori
         current_moisture, current_temperature, current_pressure = update_parameters()
 
         # aggiorno il log
-        log_full.append({'phase': 'casting','status': 'Bad' ,'timestamp': datetime.datetime.now(), 'moisture': current_moisture,
+        log_full.append({'BIM_id': BIM_id, 'phase': 'casting', 'status': 'Bad', 'begin_timestamp': start_time,
+                         'end_timestamp': datetime.datetime.now(), 'moisture': current_moisture,
                          'temperature': current_temperature, 'pressure': current_pressure})
 
         end_time = time.time()
         elapsed_time = end_time - start_time
 
+        # Salvataggio Excel
         if elapsed_time > full_report_delay:
-            #TODO salva su file Excel completo
-            pass
+            # Salvataggio su file Excel completo
+            data_converter.append_summary(log_full, file_detail=file_suffix[1])
 
         if elapsed_time > short_report_delay:
-            #TODO salva su file Excel riassuntivo
+            # TODO salva su file Excel riassuntivo
+
             pass
 
         # delay lettura casting
