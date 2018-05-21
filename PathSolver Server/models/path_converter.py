@@ -1,6 +1,5 @@
-import json
 from typing import List, Dict
-from pathfinder import Spot
+from models import Spot
 
 # type aliases
 Path = List[Spot]

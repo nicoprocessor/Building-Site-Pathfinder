@@ -1,4 +1,4 @@
-import pathfinder as pf
+import models as pf
 
 if __name__ == '__main__':
     grid = pf.Grid(start_coord=None, end_coord=None, rows=5, cols=5)
