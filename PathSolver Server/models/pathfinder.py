@@ -1,5 +1,4 @@
 import math
-from typing import List, Any, Tuple
 from queue import PriorityQueue
 
 incremental_cost = 1
@@ -64,10 +63,6 @@ class CheckablePriorityQueue(PriorityQueue):
             return item in self.queue
 
 
-# type aliases
-Path = List[Spot]
-
-
 class Grid(object):
     """A grid made of spots"""
 
@@ -103,7 +98,7 @@ class Grid(object):
     def __repr__(self):
         pass
 
-    def add_neighbors(self, spot: Spot) -> None:
+    def add_neighbors(self, spot):
         """Evaluate neighbors for the given spot. A neighbor spot is any adjacent spot on
             the grid to the actual spot such as the Manhattan distance is exactly 1.
         """
@@ -116,7 +111,7 @@ class Grid(object):
         if spot.y > 0:
             spot.neighbors.append(self.mesh[spot.x][spot.y - 1])
 
-    def a_star(self, alternatives: int = 1) -> Tuple[bool, Path]:
+    def a_star(self, alternatives = 1):
         """A* pathfinding algorithm"""
         # TODO implement alternative path find
         path = []
