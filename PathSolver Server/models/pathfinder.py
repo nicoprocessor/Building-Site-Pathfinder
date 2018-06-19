@@ -66,11 +66,12 @@ class CheckablePriorityQueue(PriorityQueue):
 class Grid(object):
     """A grid made of spots"""
 
-    def __init__(self, start_coord: Any, end_coord: Any, rows: int = 10, cols: int = 10):
+    def __init__(self, start_coord, end_coord, rows=10, cols=10):
         self.rows = rows
         self.cols = cols
         self.mesh = [None] * cols
 
+        # init mesh
         for i in range(rows):
             self.mesh[i] = [None] * cols
             for j in range(cols):
@@ -111,7 +112,7 @@ class Grid(object):
         if spot.y > 0:
             spot.neighbors.append(self.mesh[spot.x][spot.y - 1])
 
-    def a_star(self, alternatives = 1):
+    def a_star(self, alternatives=1):
         """A* pathfinding algorithm"""
         # TODO implement alternative path find
         path = []
