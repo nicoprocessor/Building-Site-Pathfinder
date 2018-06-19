@@ -9,7 +9,7 @@ spot_type_start = "start"
 spot_type_end = "end"
 
 type_conversion = {
-    spot_type_traversable: '0',
+    spot_type_traversable: '_',
     spot_type_obstacle: 'X',
     spot_type_robot: 'R',
     "path": '0'

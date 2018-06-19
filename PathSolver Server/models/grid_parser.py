@@ -7,7 +7,7 @@ from collections import OrderedDict
 from pathfinder import Grid
 
 item_types = {
-    'traversable': ' ',
+    'traversable': '_',
     'obstacle': 'X',
     'robot': 'R',
     'start': 'S',
@@ -104,14 +104,34 @@ def parse_json_file():
         print("Start pos: {}\nEnd pos: {}".format(start_pos, end_pos))
 
         # TODO implement the entire mesh parsing and creation in the grid constructor
-        parsed_grid = Grid(start_coord=start_pos, end_coord=end_pos, rows=rows, cols=cols)
-    return parsed_grid
+        #parsed_grid = Grid(start_coord=start_pos, end_coord=end_pos, rows=rows, cols=cols)
+        parsed_grid = None
+    return parsed_grid, parsed_json
+
+
+def dict_to_ASCII(conversion_map, maze):
+    """
+    Prints the maze map using ASCII characters
+    :param conversion_map: types to ASCII character
+    :param maze: the map that needs to be converted
+    """
+
+    for i in range(maze['rows']):
+        ascii_line = ''
+        for j in range(maze['cols']):
+            current_element_type = maze['maze'][i * cols + j]['type']
+            # print("({},{}): {}".format(i, j, current_element_type))
+            ascii_line += conversion_map[current_element_type]
+        print(ascii_line)
 
 
 if __name__ == '__main__':
-    rows, cols = 20, 20
+    rows, cols = 10, 10
     start_pos = (0, 0)
     end_pos = (rows - 1, cols - 1)
 
-    generate_random_maze(rows, cols, 0.22, start_pos=start_pos, end_pos=end_pos)
-    parse_json_file()
+    generate_random_maze(rows, cols, 0.17, start_pos=start_pos, end_pos=end_pos)
+
+    grid, parsed_dict = parse_json_file()
+    dict_to_ASCII(item_types, parsed_dict)
+
