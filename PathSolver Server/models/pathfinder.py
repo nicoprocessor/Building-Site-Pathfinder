@@ -66,7 +66,7 @@ class CheckablePriorityQueue(PriorityQueue):
 class Grid(object):
     """A grid made of spots"""
 
-    def __init__(self, start_coord, end_coord, rows=10, cols=10):
+    def __init__(self, start_coord, end_coord, rows, cols):
         self.rows = rows
         self.cols = cols
         self.mesh = [None] * cols
