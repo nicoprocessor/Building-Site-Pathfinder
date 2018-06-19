@@ -1,10 +1,9 @@
 import json
 import pathlib
 import random
+import re
 import time
 from collections import OrderedDict
-
-from pathfinder import Grid
 
 item_types = {
     'traversable': '_',
@@ -104,9 +103,65 @@ def parse_json_file():
         print("Start pos: {}\nEnd pos: {}".format(start_pos, end_pos))
 
         # TODO implement the entire mesh parsing and creation in the grid constructor
-        #parsed_grid = Grid(start_coord=start_pos, end_coord=end_pos, rows=rows, cols=cols)
+        # parsed_grid = Grid(start_coord=start_pos, end_coord=end_pos, rows=rows, cols=cols)
         parsed_grid = None
     return parsed_grid, parsed_json
+
+
+def swap_key_value(old_dict):
+    """
+    Creates a new dictionary swapping keys and values of an existing dictionary
+    :param old_dict: the dictionary that has to be swapped
+    :return: the new dictionary, obtained swapping keys and values
+    """
+    new_dict = {}
+    for old_key, old_value in old_dict.items():
+        new_dict[old_value] = old_key
+
+    # print if some keys were overwritten during the process
+    if len(new_dict) == len(old_dict):
+        print("No keys were lost during the process")
+    else:
+        print("Some values were lost during the process")
+    return new_dict
+
+
+def ASCII_to_dict(conversion_map):
+    """
+    Converts a maze from ASCII format to dictionary
+    :param conversion_map: ASCII character to item type
+    :return: the dictionary containing the maze map
+    """
+    maze_path = pathlib.Path.cwd().parent.joinpath('res', 'ASCII_maze-example.txt')
+    lines = []
+    with open(maze_path, 'r') as f:
+        for line in f:
+            if line != '':
+                line = re.sub(r"'+", '', line)  # remove new lines characters
+                line = re.sub(r"$\n", '', line)  # remove superscript characters
+                lines.append(line)
+
+    # init dst dictionary
+    maze_dict = OrderedDict()
+    maze_dict['timestamp'] = int(time.time())
+
+    maze_dict['rows'] = len(lines)
+    maze_dict['cols'] = len(lines[0])
+    cells = []
+
+    print(conversion_map)
+    # char by char conversion
+    for i, line in enumerate(lines):
+        for j, char in enumerate(line):
+            cell = {
+                'x': i,
+                'y': j,
+                'type': conversion_map[char]
+            }
+            cells.append(cell)
+    maze_dict['maze'] = cells
+
+    return maze_dict
 
 
 def dict_to_ASCII(conversion_map, maze):
@@ -115,7 +170,6 @@ def dict_to_ASCII(conversion_map, maze):
     :param conversion_map: types to ASCII character
     :param maze: the map that needs to be converted
     """
-
     for i in range(maze['rows']):
         ascii_line = ''
         for j in range(maze['cols']):
@@ -130,8 +184,6 @@ if __name__ == '__main__':
     start_pos = (0, 0)
     end_pos = (rows - 1, cols - 1)
 
-    generate_random_maze(rows, cols, 0.17, start_pos=start_pos, end_pos=end_pos)
+    # generate_random_maze(rows, cols, 0.17, start_pos=start_pos, end_pos=end_pos)
 
-    grid, parsed_dict = parse_json_file()
-    dict_to_ASCII(item_types, parsed_dict)
-
+    # grid, parsed_dict = parse_json_file()

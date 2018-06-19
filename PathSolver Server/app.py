@@ -8,7 +8,7 @@ def hello_world():
     return 'Hello World!'
 
 
-@app.route('/', methods=['GET'])
+@app.route('/', methods=['GET', 'POST'])
 def find_path():
     # TODO
     pass

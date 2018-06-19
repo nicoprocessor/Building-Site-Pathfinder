@@ -1,4 +1,4 @@
-from grid_parser import parse_json_file
+from parser import parse_json_file
 
 
 def solve_maze(path_alternatives):
