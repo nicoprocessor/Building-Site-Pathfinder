@@ -114,7 +114,7 @@ class Grid(object):
 
     def a_star(self, alternatives=1):
         """A* pathfinding algorithm"""
-        # TODO implement alternative path find
+        # TODO implement alternatives
         path = []
         open_queue = CheckablePriorityQueue()
         closed_set = []
