@@ -1,9 +1,13 @@
 import json
 import pathlib
+import pprint
 import random
 import re
 import time
 from collections import OrderedDict
+
+from models.pathfinder import Grid
+from models.pathfinder import Spot
 
 item_types = {
     'traversable': '_',
@@ -15,10 +19,6 @@ item_types = {
 
 # available directions of movement, written in clockwise order
 directions = ['N', 'E', 'S', 'W']
-
-
-def dict_to_items():
-    pass
 
 
 def generate_random_maze(rows, cols, obstacle_rate, start_pos, end_pos):
@@ -84,30 +84,33 @@ def find_dict_index_in_dict_list(lst, key, value):
     raise ValueError
 
 
-def parse_json_file():
+def json_to_grid(file_name):
     """
-    Parses a JSON file containing the map and generates a Grid system using that instance
-    :return: a Grid structured following the JSON file
+    Parses a JSON file containing the map and generates a grid using that instance
+    :param file_name: the name of the file containing the JSON structure of the maze
+    :return: a grid object structured following the given JSON file
     """
-    sheet_path = pathlib.Path.cwd().parent.joinpath('res', 'map_example.json')
+    sheet_path = pathlib.Path.cwd().parent.joinpath('res', file_name)
 
     with open(sheet_path, 'r') as f:
         parsed_json = json.load(f)
 
-        timestamp = parsed_json['timestamp']
+        # timestamp = parsed_json['timestamp']
         rows = parsed_json['rows']
         cols = parsed_json['cols']
         start_pos_cell = parsed_json['maze'][find_dict_index_in_dict_list(parsed_json['maze'], 'type', 'start')]
         end_pos_cell = parsed_json['maze'][find_dict_index_in_dict_list(parsed_json['maze'], 'type', 'end')]
-        start_pos = (start_pos_cell['x'], start_pos_cell['y'])
-        end_pos = (end_pos_cell['x'], end_pos_cell['y'])
+        start_pos = {'x': start_pos_cell['x'], 'y': start_pos_cell['y']}
+        end_pos = {'x': end_pos_cell['x'], 'y': end_pos_cell['y']}
 
-        print("Start pos: {}\nEnd pos: {}".format(start_pos, end_pos))
+        spots = []
+        for s in parsed_json['maze']:
+            parsed_spot = Spot(x=s['x'], y=s['y'], spot_type=s['type'])
+            spots.append(parsed_spot)
 
-        # TODO implement the entire mesh parsing and creation in the grid constructor
-        # parsed_grid = Grid(start_coord=start_pos, end_coord=end_pos, rows=rows, cols=cols)
-        parsed_grid = None
-    return parsed_grid, parsed_json
+        pprint.pprint(spots)
+        parsed_grid = Grid(start_coord=start_pos, end_coord=end_pos, rows=rows, cols=cols, spots=spots)
+    return parsed_grid
 
 
 def swap_key_value(old_dict):
@@ -128,13 +131,14 @@ def swap_key_value(old_dict):
     return new_dict
 
 
-def ASCII_file_to_dict(conversion_map, file_path):
+def ASCII_file_to_dict(conversion_map, file_name):
     """
     Converts a maze from ASCII format to dictionary
     :param conversion_map: ASCII character to item type
+    :param file_name: the path to the ASCII text file
     :return: the dictionary containing the maze map
     """
-    maze_path = pathlib.Path.cwd().parent.joinpath('res', file_path)
+    maze_path = pathlib.Path.cwd().parent.joinpath('res', file_name)
     lines = []
     with open(maze_path, 'r') as f:
         for line in f:
@@ -180,7 +184,7 @@ def dict_to_ASCII(conversion_map, maze):
     for i in range(maze['rows']):
         ascii_line = ''
         for j in range(maze['cols']):
-            current_element_type = maze['maze'][i * cols + j]['type']
+            current_element_type = maze['maze'][i * maze['cols'] + j]['type']
             # print("({},{}): {}".format(i, j, current_element_type))
             ascii_line += conversion_map[current_element_type]
         print(ascii_line)
@@ -215,7 +219,7 @@ def move_to_actions(current_cell, next_cell, previous_orientation, starting_move
     :param starting_move: flag that tells if the current move is the first. This flag is necessary since the first move is the only one that can lead to a multiple rotation.
     :return: the moves that the entity has to follow in order to achieve the move indicated from the couple of steps
     """
-    # considering a single step as tuple of coordinates (x,y)
+
     # available actions: rotate (R), move forward (M)
     # available move directions: North (N), South (S), East (E), West (W)
     # available rotation directions: +90° (+), -90° (-), 0 (blank)
@@ -239,8 +243,9 @@ def move_to_actions(current_cell, next_cell, previous_orientation, starting_move
             if (directions.index(previous_orientation) + 1) % len(
                     directions) != movement_direction:  # rotation by +90° isn't enough
                 if (directions.index(previous_orientation) + 2) % len(
-                        directions) != movement_direction  # rotation by +180° isn't enough
-                    rotation_direction = '-'  # since +180° isn't enough we can assume that the desired rotation is +270° = -90°
+                        directions) != movement_direction:  # rotation by +180° isn't enough
+                    rotation_direction = '-'  # since +180° isn't enough we can
+                    # assume that the desired rotation is +270° = -90°
                 else:  # +180°
                     rotation_direction = '++'
             else:  # +90°
@@ -257,6 +262,8 @@ def move_to_actions(current_cell, next_cell, previous_orientation, starting_move
 
 
 if __name__ == '__main__':
+    # json_to_grid('map_example.json')
+    pass
 # rows, cols = 5, 5
 # start_pos = (0, 0)
 # end_pos = (rows - 1, cols - 1)

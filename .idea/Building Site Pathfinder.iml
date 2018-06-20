@@ -6,6 +6,8 @@
       <sourceFolder url="file://$MODULE_DIR$/PathSolver Server/models/flowchart" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/PathSolver Server" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/PathSolver Server/models/pathfinder" isTestSource="false" />
+      <excludeFolder url="file://$MODULE_DIR$/PathSolver Server/venv" />
+      <excludeFolder url="file://$MODULE_DIR$/Sketch" />
     </content>
     <orderEntry type="jdk" jdkName="Python 3.6" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />

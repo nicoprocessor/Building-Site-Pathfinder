@@ -66,7 +66,7 @@ class CheckablePriorityQueue(PriorityQueue):
 class Grid(object):
     """A grid made of spots"""
 
-    def __init__(self, start_coord, end_coord, rows, cols):
+    def __init__(self, start_coord, end_coord, rows, cols, spots):
         self.rows = rows
         self.cols = cols
         self.mesh = [None] * cols
@@ -75,17 +75,11 @@ class Grid(object):
         for i in range(rows):
             self.mesh[i] = [None] * cols
             for j in range(cols):
-                self.mesh[i][j] = Spot(i, j, spot_type_traversable)
-
-        # default values for starting position are [0,0] and [rows-1, cols-1]
-        if start_coord is None:
-            start_coord = {'x': 0, 'y': 0}
-        if end_coord is None:
-            end_coord = {'x': self.cols - 1, 'y': self.rows - 1}
+                self.mesh[i][j] = spots[i * cols + j]
 
         # start_spot and end_spot expected format {'x': 0, 'y': 0}
-        self.start_spot = Spot(start_coord['x'], start_coord['y'])
-        self.end_spot = Spot(end_coord['x'], end_coord['y'])
+        self.start_spot = Spot(start_coord['x'], start_coord['y'], spot_type='start')
+        self.end_spot = Spot(end_coord['x'], end_coord['y'], spot_type='end')
 
         # fill neighbors
         for i in range(rows):
@@ -100,8 +94,10 @@ class Grid(object):
         pass
 
     def add_neighbors(self, spot):
-        """Evaluate neighbors for the given spot. A neighbor spot is any adjacent spot on
-            the grid to the actual spot such as the Manhattan distance is exactly 1.
+        """
+        Evaluate neighbors for the given spot. A neighbor spot is any adjacent spot on
+        the grid to the actual spot such as the Manhattan distance is exactly 1.
+        :param spot: the spot that has to be modified
         """
         if spot.x < self.cols - 1:
             spot.neighbors.append(self.mesh[spot.x + 1][spot.y])
@@ -112,8 +108,13 @@ class Grid(object):
         if spot.y > 0:
             spot.neighbors.append(self.mesh[spot.x][spot.y - 1])
 
-    def a_star(self, alternatives=1):
-        """A* pathfinding algorithm"""
+    def a_star(self, alternatives=0):
+        """
+        Solves the maze from start to end using A* algorithm
+        :param alternatives: number of alternative paths to evaluate (use, with caution)
+        :return: the list of spots that solves the maze or a list of lists of possible solutions, if the maze is solvable.
+                False otherwise.
+        """
         # TODO implement alternatives
         path = []
         open_queue = CheckablePriorityQueue()
