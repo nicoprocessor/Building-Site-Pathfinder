@@ -17,17 +17,37 @@ type_conversion = {
 
 
 def manhattan_distance(a, b):
-    """Returns the manhattan distance between two spots."""
+    """
+    Returns the Manhattan distance between two spots.
+    :param a: the coordinates of the first spot
+    :param b: the coordinates of the second spot
+    :return: the Manhattan distance
+    """
     return abs(b.x - a.x) + abs(b.y - a.y)
 
 
 def euclidean_distance(a, b):
-    """Returns the euclidean distance between two spots."""
+    """
+    Returns the euclidean distance between two spots.
+    :param a: the coordinates of the first spot
+    :param b: the coordinates of the second spot
+    :return: the euclidean distance
+    """
     return math.sqrt(pow(b.x - a.x, 2) + pow(b.y - a.y, 2))
 
 
-def eval_heuristic(a, b):
-    return manhattan_distance(a, b)
+def eval_heuristic(a, b, heuristic):
+    """
+    Evaluate the distance between the two given spots using the given heuristic
+    :param a: the coordinates of the first spot
+    :param b: the coordinates of the second spot
+    :param heuristic: the required heuristic
+    :return: the distance between the given spots
+    """
+    if heuristic == 'MANHATTAN':
+        return manhattan_distance(a, b)
+    else:
+        return euclidean_distance(a, b)
 
 
 class Spot(object):
@@ -56,7 +76,9 @@ class Spot(object):
 
 
 class CheckablePriorityQueue(PriorityQueue):
-    """Extension of PriorityQueue class, add the functionality of membership test"""
+    """
+    Extension of PriorityQueue class, add the functionality of membership test
+    """
 
     def __contains__(self, item):
         with self.mutex:
@@ -64,7 +86,9 @@ class CheckablePriorityQueue(PriorityQueue):
 
 
 class Grid(object):
-    """A grid made of spots"""
+    """
+    A grid made of spots
+    """
 
     def __init__(self, start_coord, end_coord, rows, cols, spots):
         self.rows = rows
@@ -77,14 +101,15 @@ class Grid(object):
             for j in range(cols):
                 self.mesh[i][j] = spots[i * cols + j]
 
-        # start_spot and end_spot expected format {'x': 0, 'y': 0}
-        self.start_spot = Spot(start_coord['x'], start_coord['y'], spot_type='start')
-        self.end_spot = Spot(end_coord['x'], end_coord['y'], spot_type='end')
-
         # fill neighbors
         for i in range(rows):
             for j in range(cols):
                 self.add_neighbors(self.mesh[i][j])
+                print("Spot: {}, neighbors: {}".format(self.mesh[i][j], self.mesh[i][j].neighbors))
+
+        # start_spot and end_spot expected format {'x': 0, 'y': 0}
+        self.start_spot = self.mesh[start_coord['x']][start_coord['y']]
+        self.end_spot = self.mesh[end_coord['x']][end_coord['y']]
 
     def __str__(self):
         return "Cols: {}\nRows: {}\nStart: {}\nEnd: {}\nMesh: {}".format(self.cols, self.rows, self.start_spot,
@@ -93,20 +118,32 @@ class Grid(object):
     def __repr__(self):
         pass
 
-    def add_neighbors(self, spot):
+    def add_neighbors(self, current_spot):
         """
         Evaluate neighbors for the given spot. A neighbor spot is any adjacent spot on
         the grid to the actual spot such as the Manhattan distance is exactly 1.
-        :param spot: the spot that has to be modified
+        :param current_spot: the spot that has to be modified
         """
-        if spot.x < self.cols - 1:
-            spot.neighbors.append(self.mesh[spot.x + 1][spot.y])
-        if spot.x > 0:
-            spot.neighbors.append(self.mesh[spot.x - 1][spot.y])
-        if spot.y < self.rows - 1:
-            spot.neighbors.append(self.mesh[spot.x][spot.y + 1])
-        if spot.y > 0:
-            spot.neighbors.append(self.mesh[spot.x][spot.y - 1])
+        candidate_neighbors = []
+
+        if current_spot.x < self.cols - 1:
+            # add the neighbor on the right
+            candidate_neighbors.append(self.mesh[current_spot.x + 1][current_spot.y])
+        if current_spot.x > 0:
+            # add the neighbor on the left
+            candidate_neighbors.append(self.mesh[current_spot.x - 1][current_spot.y])
+        if current_spot.y < self.rows - 1:
+            # add the neighbor below
+            candidate_neighbors.append(self.mesh[current_spot.x][current_spot.y + 1])
+        if current_spot.y > 0:
+            # add the neighbor above
+            candidate_neighbors.append(self.mesh[current_spot.x][current_spot.y - 1])
+
+        # Append only if the neighbor is not an obstacle
+        # This will save time later when we'll check every neighbor
+        for candidate in candidate_neighbors:
+            if candidate.spot_type != spot_type_obstacle:
+                current_spot.neighbors.append(candidate)
 
     def a_star(self, alternatives=0):
         """
@@ -147,11 +184,16 @@ class Grid(object):
 
                     # check all the neighbors
                     neighbors = current_spot.neighbors
+                    print("Current spot: {}, neighbors: {}".format(current_spot, neighbors))
+
                     for current_neighbor in neighbors:
-                        # check if neither the neighbor hasn't been visited yet nor it's an obstacle
-                        if current_neighbor.spot_type != spot_type_obstacle and current_neighbor not in closed_set:
+                        # check if neither the neighbor hasn't been visited
+                        # we don't need to check if the neighbor is not an obstacle
+                        # because we removed those when generating the grid
+                        if current_neighbor not in closed_set:
                             # I could have reached the next spot by following a less efficient path.
-                            temp_g = current_spot.g + eval_heuristic(current_neighbor, current_spot)
+                            temp_g = current_spot.g + eval_heuristic(current_neighbor, current_spot,
+                                                                     heuristic='MANHATTAN')
 
                             if temp_g < current_neighbor.g or current_neighbor.g == 10e+6:
                                 current_neighbor.g = temp_g
@@ -160,10 +202,10 @@ class Grid(object):
                                 open_queue.put(current_neighbor)
 
                             # update neighbor status
-                            current_neighbor.h = eval_heuristic(current_neighbor, self.end_spot)
+                            current_neighbor.h = eval_heuristic(current_neighbor, self.end_spot, heuristic='MANHATTAN')
                             current_neighbor.f = current_neighbor.g + current_neighbor.h
                             current_neighbor.previous = current_spot
             else:
-                # no solution
+                # no solution found
                 print("No path found!")
                 return False, []
