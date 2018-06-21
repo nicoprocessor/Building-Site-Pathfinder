@@ -3,18 +3,24 @@ import pathlib
 import random
 import re
 import time
-from collections import OrderedDict
 
 from models.pathfinder import Grid
 from models.pathfinder import Spot
+from models.utils import find_dict_index_in_dict_list
+from models.utils import swap_key_value
 
 
 class Parser(object):
-    def __init__(self, item_types, directions, src_ASCII_path, src_json_path, dst_json_path):
+    """
+    Wrapper class of some general parsing methods
+    """
+
+    def __init__(self, item_types, directions, src_ASCII_path, src_json_path, dst_ASCII_path, dst_json_path):
         self.item_types = item_types
         self.directions = directions
         self.src_ASCII_path = src_ASCII_path
         self.src_json_path = src_json_path
+        self.dst_ASCII_path = dst_ASCII_path
         self.dst_json_path = dst_json_path
 
     def generate_random_maze(self, rows, cols, obstacle_rate, start_pos, end_pos):
@@ -26,10 +32,11 @@ class Parser(object):
         :param start_pos: the starting position of the maze
         :param end_pos: the goal of the maze
         """
-        maze = OrderedDict()
-        maze['timestamp'] = int(time.time())
-        maze['rows'] = rows
-        maze['cols'] = cols
+        random_maze = {
+            'timestamp': int(time.time()),
+            'rows': rows,
+            'cols': cols
+        }
 
         obstacles = 0
         item_list = []
@@ -48,7 +55,7 @@ class Parser(object):
                         item['type'] = 'obstacle'
                         obstacles += 1
                 item_list.append(item)
-        maze['maze'] = item_list
+        random_maze['maze'] = item_list
 
         # debug
         print("Obstacles: {} on {} total cells.\n"
@@ -56,25 +63,18 @@ class Parser(object):
               "Actual obstacle rate: {}".format(obstacles, rows * cols,
                                                 obstacle_rate, obstacles / (rows * cols)))
 
-        # write the maze to the example file
+        # display the maze and save it to external txt file
+        ascii_maze = self.display_maze_from_dict(random_maze, print_on_console=False)
+        example_ascii_file_path = pathlib.Path.cwd().parent.joinpath('res', self.src_ASCII_path)
+        with open(example_ascii_file_path, 'w') as f:
+            f.write(ascii_maze)
+
+        # write the maze to external file
         example_file_path = pathlib.Path.cwd().parent.joinpath('res', self.dst_json_path)
         with open(example_file_path, 'w') as f:
-            json.dump(maze, f)
+            json.dump(random_maze, f)
 
-    @staticmethod
-    def find_dict_index_in_dict_list(lst, key, value):
-        """
-        Searches for a specific dictionary in a dictionary list based on the pair (key, value)
-        and returns the index of the first element that matches.
-        :param lst: the list of dictionaries
-        :param key: the key that has to match with the given value
-        :param value: the value that has to match
-        :return: the index of the dictionary, if present. Otherwise raises a ValueError exception.
-        """
-        for index, dic in enumerate(lst):
-            if dic[key] == value:
-                return index
-        raise ValueError
+        return random_maze
 
     def json_to_grid(self):
         """
@@ -94,8 +94,8 @@ class Parser(object):
         """
         rows = dic['rows']
         cols = dic['cols']
-        start_pos_cell = dic['maze'][self.find_dict_index_in_dict_list(dic['maze'], 'type', 'start')]
-        end_pos_cell = dic['maze'][self.find_dict_index_in_dict_list(dic['maze'], 'type', 'end')]
+        start_pos_cell = dic['maze'][find_dict_index_in_dict_list(dic['maze'], 'type', 'start')]
+        end_pos_cell = dic['maze'][find_dict_index_in_dict_list(dic['maze'], 'type', 'end')]
         start_pos = {'x': start_pos_cell['x'], 'y': start_pos_cell['y']}
         end_pos = {'x': end_pos_cell['x'], 'y': end_pos_cell['y']}
 
@@ -106,24 +106,6 @@ class Parser(object):
 
         parsed_grid = Grid(start_coord=start_pos, end_coord=end_pos, rows=rows, cols=cols, spots=spots)
         return parsed_grid
-
-    @staticmethod
-    def swap_key_value(old_dict):
-        """
-        Creates a new dictionary swapping keys and values of an existing dictionary
-        :param old_dict: the dictionary that has to be swapped
-        :return: the new dictionary, obtained swapping keys and values
-        """
-        new_dict = {}
-        for old_key, old_value in old_dict.items():
-            new_dict[old_value] = old_key
-
-        # print if some keys were overwritten during the process
-        if len(new_dict) == len(old_dict):
-            print("No keys were lost during the process")
-        else:
-            print("Some values were lost during the process")
-        return new_dict
 
     def ASCII_file_to_dict(self):
         """
@@ -143,13 +125,14 @@ class Parser(object):
                         line = re.sub(r"$\n", '', line)  # remove superscript characters
                         lines.append(line)
 
-        conversion_map = self.swap_key_value(self.item_types)
-        # init dst dictionary
-        maze_dict = OrderedDict()
-        maze_dict['timestamp'] = int(time.time())
+        conversion_map = swap_key_value(self.item_types)
 
-        maze_dict['rows'] = len(lines)
-        maze_dict['cols'] = len(lines[0])
+        # init dst dictionary
+        maze_dict = {
+            'timestamp': int(time.time()),
+            'rows': len(lines),
+            'cols': len(lines[0])
+        }
         cells = []
 
         # char by char conversion
@@ -183,18 +166,42 @@ class Parser(object):
         parsed_grid = self.dict_to_grid(parsed_dict)
         return parsed_grid
 
-    def dict_to_ASCII(self, maze):
+    def display_maze_from_dict(self, maze, print_on_console):
         """
-        Prints the maze map using ASCII characters
+        Prints the maze map using ASCII character
         :param maze: the map that needs to be converted
+        :param print_on_console: print the maze on the console if True
+        :return: the structure of the maze just printed
         """
+        lines = []
+
         for i in range(maze['rows']):
             ascii_line = ''
             for j in range(maze['cols']):
                 current_element_type = maze['maze'][i * maze['cols'] + j]['type']
                 # print("({},{}): {}".format(i, j, current_element_type))
-                ascii_line += self.item_types[current_element_type]
-            print(ascii_line)
+                ascii_line += self.item_types[current_element_type] + ' '
+            if print_on_console:
+                print(ascii_line)
+            lines.append(ascii_line)
+        return '\n'.join(lines)
+
+    def display_solution(self, maze, maze_solution, save_to_file=True):
+        """
+        Prints the maze map with the solution calculated and saves it to an external file
+        :param maze: the maze without the solution path
+        :param maze_solution: the list of spots to follow to complete the maze
+        """
+        print(f"Maze: {maze}")
+        # merge the two dictionaries
+        maze_solved = {**maze, **maze_solution}
+
+        maze_solved_ascii = self.display_maze_from_dict(maze=maze_solved, print_on_console=False)
+        if save_to_file:
+            maze_solved_file_path = pathlib.Path().parent.joinpath('res', self.dst_ASCII_path)
+            with open(maze_solved_file_path, 'w') as f:
+                f.write(maze_solved_ascii)
+        pass
 
     def path_to_moves(self, maze_solution_path, starting_orientation='N'):
         """
@@ -265,10 +272,3 @@ class Parser(object):
         actions += movement_direction
 
         return actions, movement_direction
-
-
-if __name__ == '__main__':
-    pass
-# rows, cols = 5, 5
-# start_pos = (0, 0)
-# end_pos = (rows - 1, cols - 1)

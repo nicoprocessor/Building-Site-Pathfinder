@@ -1,4 +1,5 @@
 import math
+import time
 from queue import PriorityQueue
 
 incremental_cost = 1
@@ -7,12 +8,13 @@ spot_type_obstacle = "obstacle"
 spot_type_robot = "robot"
 spot_type_start = "start"
 spot_type_end = "end"
+spot_type_solution = "solution"
 
 type_conversion = {
     spot_type_traversable: '_',
     spot_type_obstacle: 'X',
     spot_type_robot: 'R',
-    "path": '0'
+    spot_type_solution: '$'
 }
 
 
@@ -105,7 +107,6 @@ class Grid(object):
         for i in range(rows):
             for j in range(cols):
                 self.add_neighbors(self.mesh[i][j])
-                print("Spot: {}, neighbors: {}".format(self.mesh[i][j], self.mesh[i][j].neighbors))
 
         # start_spot and end_spot expected format {'x': 0, 'y': 0}
         self.start_spot = self.mesh[start_coord['x']][start_coord['y']]
@@ -154,6 +155,7 @@ class Grid(object):
         """
         # TODO implement alternatives
         path = []
+        solution = {'alternatives': alternatives}
         open_queue = CheckablePriorityQueue()
         closed_set = []
 
@@ -161,21 +163,27 @@ class Grid(object):
 
         # A* main loop
         while True:
+            start = time.process_time()
             if open_queue.qsize() > 0:
                 # Best next option
                 current_spot = open_queue.queue[0]
 
                 if current_spot == self.end_spot:
+                    end = time.process_time()
+
                     # Found destination, start backtracking to find path to starting spot
                     temp = current_spot
-                    path.append(current_spot)
+                    path.append({'x': current_spot.x, 'y': current_spot.y, 'type': spot_type_solution})
 
                     while temp.previous is not None:
-                        path.append(temp.previous)
+                        path.append({'x': temp.previous.x, 'y': temp.previous.y, 'type': spot_type_solution})
                         temp = temp.previous
 
                     print("Path found!")
-                    return True, list(reversed(path))
+                    solution['elapsed_time'] = end - start
+                    solution['steps'] = len(path)
+                    solution['path'] = list(reversed(path))
+                    return True, solution
 
                 else:
                     # move the best option from open set to closed set
@@ -184,7 +192,6 @@ class Grid(object):
 
                     # check all the neighbors
                     neighbors = current_spot.neighbors
-                    print("Current spot: {}, neighbors: {}".format(current_spot, neighbors))
 
                     for current_neighbor in neighbors:
                         # check if neither the neighbor hasn't been visited
@@ -208,4 +215,5 @@ class Grid(object):
             else:
                 # no solution found
                 print("No path found!")
-                return False, []
+                end = time.process_time()
+                return False, {'elapsed_time': end - start}

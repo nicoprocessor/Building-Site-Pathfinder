@@ -1,5 +1,16 @@
-S _ _ X _
-_ X _ _ _
-_ _ X _ _
-_ X _ X _
-_ X _ X E
+S _ _ _ _ 
+_ _ _ X _ 
+_ _ _ X _ 
+X _ _ _ _ 
+_ _ _ _ E
+
+Solution: (True, {'alternatives': 0, 'elapsed_time': 0.0, 'steps': 9,
+'path': [{'x': 0, 'y': 0, 'type': 'solution'},
+{'x': 0, 'y': 1, 'type': 'solution'},
+{'x': 0, 'y': 2, 'type': 'solution'},
+{'x': 0, 'y': 3, 'type': 'solution'},
+ {'x': 0, 'y': 4, 'type': 'solution'},
+ {'x': 1, 'y': 4, 'type': 'solution'},
+ {'x': 2, 'y': 4, 'type': 'solution'},
+ {'x': 3, 'y': 4, 'type': 'solution'},
+ {'x': 4, 'y': 4, 'type': 'solution'}]})
