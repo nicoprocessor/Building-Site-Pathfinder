@@ -11,7 +11,7 @@ from models.utils import merge_dict_lists_on_specific_keys_with_priority
 from models.utils import swap_key_value
 
 
-class Parser(object):
+class Maze_Parser(object):
     """
     Wrapper class of some general parsing methods
     """
@@ -69,9 +69,9 @@ class Parser(object):
                                                  is_solved=False)
 
         # write the maze to external file
-        example_file_path = pathlib.Path.cwd().parent.joinpath('res', self.dst_json_path)
+        example_file_path = pathlib.Path.cwd().parent.joinpath('res', self.src_json_path)
         with open(example_file_path, 'w') as f:
-            json.dump(random_maze, f)
+            json.dump(random_maze, f, indent=2)
 
         return random_maze
 
@@ -166,6 +166,25 @@ class Parser(object):
         parsed_grid = self.dict_to_grid(parsed_dict)
         return parsed_grid
 
+    def dict_maze_to_ascii(self, maze, print_on_console):
+        """Converts the maze map using ascii character
+        :param maze: the map that needs to be converted
+        :param print_on_console: print the maze on the console if True
+        :return: the structure of the maze just printed
+        """
+        lines = []
+
+        for i in range(maze['rows']):
+            ascii_line = ''
+            for j in range(maze['cols']):
+                current_element_type = maze['maze'][i * maze['cols'] + j]['type']
+                # print("({},{}): {}".format(i, j, current_element_type))
+                ascii_line += self.item_types[current_element_type] + ' '
+            if print_on_console:
+                print(ascii_line)
+            lines.append(ascii_line)
+        return '\n'.join(lines)
+
     def display_maze_from_dict(self, maze, save_to_file, print_on_console, is_solved):
         """
         Converts the maze map using ascii character
@@ -176,19 +195,7 @@ class Parser(object):
             is already solved (contains cells of type: 'solution')
         :return: the structure of the maze just printed
         """
-        lines = []
-
-        for i in range(maze['rows']):
-            ascii_line = ''
-            for j in range(maze['cols']):
-                current_element_type = maze['maze'][j * maze['cols'] + i]['type']
-                # print("({},{}): {}".format(i, j, current_element_type))
-                ascii_line += self.item_types[current_element_type] + ' '
-            if print_on_console:
-                print(ascii_line)
-            lines.append(ascii_line)
-
-        ascii_maze = '\n'.join(lines)
+        ascii_maze = self.dict_maze_to_ascii(maze=maze, print_on_console=print_on_console)
 
         if save_to_file:
             if is_solved:
@@ -199,7 +206,6 @@ class Parser(object):
                 file_path = pathlib.Path.cwd().parent.joinpath('res', self.src_ascii_path)
             with open(file_path, 'w') as f:
                 f.write(ascii_maze)
-
         return ascii_maze
 
     def display_solution_from_dict(self, maze, maze_solution, save_to_file, print_on_console):
@@ -214,12 +220,14 @@ class Parser(object):
         rows = maze['rows']
         cols = maze['cols']
 
+        # print(f"Maze solution:{maze_solution}")
         # merge the maze with the solution giving the priority to the solution
         merged_dict_list = merge_dict_lists_on_specific_keys_with_priority(l1=maze['maze'], l2=maze_solution,
                                                                            duplicates=False,
                                                                            priority=2,
                                                                            comparison_keys=['x', 'y'])
         # reconstruct the maze in order to display and save it
+        # print(f"Merged_maze {merged_dict_list}")
         solved_maze = {
             'rows': rows,
             'cols': cols,
@@ -228,6 +236,31 @@ class Parser(object):
         maze_solved_ascii = self.display_maze_from_dict(maze=solved_maze, save_to_file=save_to_file,
                                                         print_on_console=print_on_console, is_solved=True)
         return solved_maze
+
+    @staticmethod
+    def pack_moves(actions):
+        """
+        Packs the action string such as multiple action moves in a row are
+        substituted with the number that indicates the consecutive moves.
+        :param actions: the actions that the entity has to follow
+        :return: the packed string of actions
+        """
+        packed_actions = ''
+        previous_moves_counter = 0
+
+        for current_action in actions:
+            if current_action == '1':  # the current action is M
+                previous_moves_counter += 1
+            else:  # current action is R
+                if previous_moves_counter != 0:
+                    packed_actions += str(previous_moves_counter)
+                previous_moves_counter = 0
+                packed_actions += str(current_action)
+
+        if previous_moves_counter != 0:
+            packed_actions += str(previous_moves_counter)
+
+        return packed_actions
 
     def path_to_moves(self, maze_solution_path, starting_orientation='N'):
         """
@@ -240,8 +273,6 @@ class Parser(object):
         actions = ''
         current_orientation = starting_orientation
 
-        print(maze_solution_path)
-
         for i, current_cell in enumerate(maze_solution_path[:-1]):
             next_cell = maze_solution_path[i + 1]
             starting_move = True if i == 0 else False
@@ -250,7 +281,7 @@ class Parser(object):
                                                                      starting_move=starting_move)
             actions += next_actions
 
-        # TODO group subsequent 'move forward actions' in order to shrink the string
+        actions = self.pack_moves(actions)
         return actions
 
     def move_to_actions(self, current_cell, next_cell, previous_orientation, starting_move):
@@ -268,22 +299,16 @@ class Parser(object):
         # available rotation directions: +90° (+), -90° (-), 0 (blank)
         actions = ''
 
-        print(f"Current cell: {current_cell}\n"
-              f"Next cell: {next_cell}\n"
-              f"Previous orientation: {previous_orientation}")
-
         # identify the direction of the movement
-        if current_cell['x'] > next_cell['x']:  # moving left (W)
+        if current_cell['y'] > next_cell['y']:  # moving left (W)
             movement_direction = 'W'
-        elif current_cell['x'] < next_cell['x']:  # moving right (E)
+        elif current_cell['y'] < next_cell['y']:  # moving right (E)
             movement_direction = 'E'
         else:  # moving up or down (N|S)
-            if current_cell['y'] > next_cell['y']:  # moving down (S)
+            if current_cell['x'] > next_cell['x']:  # moving down (S)
                 movement_direction = 'N'
             else:  # moving up (N)
                 movement_direction = 'S'
-
-        print(f"Movement direction: {movement_direction}")
 
         next_orientation = previous_orientation
 

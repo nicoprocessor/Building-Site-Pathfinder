@@ -12,9 +12,7 @@ def swap_key_value(old_dict):
         new_dict[old_value] = old_key
 
     # print if some keys were overwritten during the process
-    if len(new_dict) == len(old_dict):
-        print("No keys were lost during the process")
-    else:
+    if len(new_dict) != len(old_dict):
         print("Some values were lost during the process")
     return new_dict
 

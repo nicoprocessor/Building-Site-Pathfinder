@@ -1,4 +1,4 @@
-from models.parser import Parser
+from models.maze_parser import Maze_Parser
 
 item_types = {
     'traversable': '_',
@@ -27,19 +27,19 @@ def solve_maze(parsing_tool, path_alternatives):
 
 # main
 if __name__ == '__main__':
-    parser = Parser(directions=directions, item_types=item_types,
-                    src_ascii_path='ascii_maze-example.txt',
-                    src_json_path='maze_example.json',
-                    dst_ascii_path='ascii_maze-solution.txt',
-                    dst_json_path='maze_solution.json')
-    size = 5
+    parser = Maze_Parser(directions=directions, item_types=item_types,
+                         src_ascii_path='ascii_maze-example.txt',
+                         src_json_path='maze_example.json',
+                         dst_ascii_path='ascii_maze-solution.txt',
+                         dst_json_path='maze_solution.json')
+    size = 10
     start = (0, 0)
     end = (size - 1, size - 1)
     obstacle_rate = 0.24
     maze = parser.generate_random_maze(rows=size, cols=size,
                                        obstacle_rate=obstacle_rate,
                                        start_pos=start, end_pos=end)
-    maze = maze
+
     solution = solve_maze(parsing_tool=parser, path_alternatives=0)
 
     if len(solution) > 0:
@@ -48,8 +48,14 @@ if __name__ == '__main__':
                                                         print_on_console=False)
 
         # convert the solution to entity moves and save it to external file in JSON format
-        moves = parser.path_to_moves(maze_solution_path=solution, starting_orientation='S')
-        print(moves)
+        starting_orientation = 'N'
+        moves = parser.path_to_moves(maze_solution_path=solution, starting_orientation=starting_orientation)
+        print(f"Starting orientation: {starting_orientation}\n"
+              f"Moves: {moves}\n"
+              f"Solution steps: {len(solution)}\n"
+              f"Entity moves: {len(moves)}\n"
+              f"Compression rate: {len(moves)/len(solution):.3f}")
+
     else:
         # TODO send error code to the application and ask to change the map, otherwise seeya!
         pass
