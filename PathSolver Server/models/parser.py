@@ -61,8 +61,8 @@ class Parser(object):
         # debug
         print("Obstacles: {} on {} total cells.\n"
               "Expected obstacle rate: {}\n"
-              "Actual obstacle rate: {}".format(obstacles, rows * cols,
-                                                obstacle_rate, obstacles / (rows * cols)))
+              "Actual obstacle rate: {:1.4f}".format(obstacles, rows * cols,
+                                                     obstacle_rate, obstacles / (rows * cols)))
 
         # display the maze and save it to external txt file
         ascii_maze = self.display_maze_from_dict(random_maze, save_to_file=True, print_on_console=False,
@@ -181,7 +181,7 @@ class Parser(object):
         for i in range(maze['rows']):
             ascii_line = ''
             for j in range(maze['cols']):
-                current_element_type = maze['maze'][i * maze['cols'] + j]['type']
+                current_element_type = maze['maze'][j * maze['cols'] + i]['type']
                 # print("({},{}): {}".format(i, j, current_element_type))
                 ascii_line += self.item_types[current_element_type] + ' '
             if print_on_console:
@@ -207,10 +207,8 @@ class Parser(object):
         Prints the maze map with the solution calculated and saves it to an external file
         :param maze: the maze without the solution path
         :param maze_solution: the list of spots to follow to complete the maze
-        :return: the solved maze converted to ascii format
+        :return: the solved maze in dict format
         """
-        print(f"Maze: {maze}")
-        print(f"Solution: {maze_solution}")
 
         # TODO save the start and the ending cells after the merge operation
         rows = maze['rows']
@@ -221,7 +219,6 @@ class Parser(object):
                                                                            duplicates=False,
                                                                            priority=2,
                                                                            comparison_keys=['x', 'y'])
-        print(f"Merged dicts: {merged_dict_list}")
         # reconstruct the maze in order to display and save it
         solved_maze = {
             'rows': rows,
@@ -230,7 +227,7 @@ class Parser(object):
         }
         maze_solved_ascii = self.display_maze_from_dict(maze=solved_maze, save_to_file=save_to_file,
                                                         print_on_console=print_on_console, is_solved=True)
-        return maze_solved_ascii
+        return solved_maze
 
     def path_to_moves(self, maze_solution_path, starting_orientation='N'):
         """
@@ -243,13 +240,17 @@ class Parser(object):
         actions = ''
         current_orientation = starting_orientation
 
-        for i, current_cell in enumerate(maze_solution_path[:-2]):
+        print(maze_solution_path)
+
+        for i, current_cell in enumerate(maze_solution_path[:-1]):
             next_cell = maze_solution_path[i + 1]
             starting_move = True if i == 0 else False
             next_actions, current_orientation = self.move_to_actions(current_cell=current_cell, next_cell=next_cell,
                                                                      previous_orientation=current_orientation,
                                                                      starting_move=starting_move)
             actions += next_actions
+
+        # TODO group subsequent 'move forward actions' in order to shrink the string
         return actions
 
     def move_to_actions(self, current_cell, next_cell, previous_orientation, starting_move):
@@ -264,28 +265,35 @@ class Parser(object):
         """
 
         # available actions: rotate (R), move forward (M)
-        # available move directions: North (N), South (S), East (E), West (W)
         # available rotation directions: +90° (+), -90° (-), 0 (blank)
         actions = ''
 
+        print(f"Current cell: {current_cell}\n"
+              f"Next cell: {next_cell}\n"
+              f"Previous orientation: {previous_orientation}")
+
         # identify the direction of the movement
-        if current_cell[0] > next_cell[0]:  # moving left (W)
+        if current_cell['x'] > next_cell['x']:  # moving left (W)
             movement_direction = 'W'
-        elif current_cell[0] < next_cell[0]:  # moving right (E)
+        elif current_cell['x'] < next_cell['x']:  # moving right (E)
             movement_direction = 'E'
         else:  # moving up or down (N|S)
-            if current_cell[1] > next_cell[0]:  # moving down (S)
-                movement_direction = 'S'
-            else:  # moving up (N)
+            if current_cell['y'] > next_cell['y']:  # moving down (S)
                 movement_direction = 'N'
+            else:  # moving up (N)
+                movement_direction = 'S'
+
+        print(f"Movement direction: {movement_direction}")
+
+        next_orientation = previous_orientation
 
         # check if the entity needs to rotate before moving to the next cell
         if previous_orientation != movement_direction:
-            if starting_move:  # we can't assume that the entity will have to rotate only by 90°
-                if (self.directions.index(previous_orientation) + 1) % len(
-                        self.directions) != movement_direction:  # rotation by +90° isn't enough
-                    if (self.directions.index(previous_orientation) + 2) % len(
-                            self.directions) != movement_direction:  # rotation by +180° isn't enough
+            if starting_move:  # we can't assume that the entity will have to rotate once by 90°
+                if self.directions[(self.directions.index(previous_orientation) + 1) % len(
+                        self.directions)] != movement_direction:  # rotation by +90° isn't enough
+                    if self.directions[(self.directions.index(previous_orientation) + 2) % len(
+                            self.directions)] != movement_direction:  # rotation by +180° isn't enough
                         rotation_direction = '-'  # since +180° isn't enough we can
                         # assume that the desired rotation is +270° = -90°
                     else:  # +180°
@@ -293,11 +301,14 @@ class Parser(object):
                 else:  # +90°
                     rotation_direction = '+'
             else:  # we can assume that the maximum rotation required is 90°
-                if (self.directions.index(previous_orientation) + 1) % len(self.directions) == movement_direction:
+                if self.directions[(self.directions.index(previous_orientation) + 1) %
+                                   len(self.directions)] == movement_direction:
                     rotation_direction = '+'
                 else:
                     rotation_direction = '-'
             actions = rotation_direction
-        actions += movement_direction
+            next_orientation = movement_direction
+        else:  # the previous orientation was already in the direction of the movement
+            pass
 
-        return actions, movement_direction
+        return actions + '1', next_orientation
