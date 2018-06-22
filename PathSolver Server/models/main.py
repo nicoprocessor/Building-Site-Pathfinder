@@ -20,20 +20,30 @@ def solve_maze(parsing_tool, path_alternatives):
     :param path_alternatives: the number of alternative paths required
     :return:
     """
-    parsed_grid = parsing_tool.ASCII_to_grid()
-    path = parsed_grid.a_star(path_alternatives)
-    # parser.display_solution(maze=parsing_tool.ASCII_file_to_dict(),
-    #                         maze_solution=path[1]['path'],
-    #                         save_to_file=True)
-    return path
+    parsed_grid = parsing_tool.ascii_to_grid()
+    solution = parsed_grid.a_star(path_alternatives)
+    solution_path = solution[1]['path']
+    return solution_path
 
 
+# main
 if __name__ == '__main__':
     parser = Parser(directions=directions, item_types=item_types,
-                    src_ASCII_path='ASCII_maze-example.txt',
+                    src_ascii_path='ascii_maze-example.txt',
                     src_json_path='maze_example.json',
-                    dst_ASCII_path='ASCII_maze-solution.txt',
+                    dst_ascii_path='ascii_maze-solution.txt',
                     dst_json_path='maze_solution.json')
-    parser.generate_random_maze(5, 5, 0.2, (0, 0), (4, 4))
+    size = 5
+    start = (0, 0)
+    end = (size - 1, size - 1)
+    obstacle_rate = 0.2
+    maze = parser.generate_random_maze(rows=size, cols=size,
+                                       obstacle_rate=obstacle_rate,
+                                       start_pos=start, end_pos=end)
+    maze = maze
     solution = solve_maze(parsing_tool=parser, path_alternatives=0)
-    print(f"Solution: {solution}")
+
+    # TODO display solution and save it to external file both in JSON and ascii format
+    parser.display_solution_from_dict(maze=maze, maze_solution=solution, save_to_file=True, print_on_console=False)
+
+    # TODO convert the solution to entity moves and save it to external file in JSON format

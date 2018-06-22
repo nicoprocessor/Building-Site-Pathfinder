@@ -7,6 +7,7 @@ import time
 from models.pathfinder import Grid
 from models.pathfinder import Spot
 from models.utils import find_dict_index_in_dict_list
+from models.utils import merge_dict_lists_on_specific_keys_with_priority
 from models.utils import swap_key_value
 
 
@@ -15,12 +16,12 @@ class Parser(object):
     Wrapper class of some general parsing methods
     """
 
-    def __init__(self, item_types, directions, src_ASCII_path, src_json_path, dst_ASCII_path, dst_json_path):
+    def __init__(self, item_types, directions, src_ascii_path, src_json_path, dst_ascii_path, dst_json_path):
         self.item_types = item_types
         self.directions = directions
-        self.src_ASCII_path = src_ASCII_path
+        self.src_ascii_path = src_ascii_path
         self.src_json_path = src_json_path
-        self.dst_ASCII_path = dst_ASCII_path
+        self.dst_ascii_path = dst_ascii_path
         self.dst_json_path = dst_json_path
 
     def generate_random_maze(self, rows, cols, obstacle_rate, start_pos, end_pos):
@@ -64,10 +65,8 @@ class Parser(object):
                                                 obstacle_rate, obstacles / (rows * cols)))
 
         # display the maze and save it to external txt file
-        ascii_maze = self.display_maze_from_dict(random_maze, print_on_console=False)
-        example_ascii_file_path = pathlib.Path.cwd().parent.joinpath('res', self.src_ASCII_path)
-        with open(example_ascii_file_path, 'w') as f:
-            f.write(ascii_maze)
+        ascii_maze = self.display_maze_from_dict(random_maze, save_to_file=True, print_on_console=False,
+                                                 is_solved=False)
 
         # write the maze to external file
         example_file_path = pathlib.Path.cwd().parent.joinpath('res', self.dst_json_path)
@@ -87,7 +86,8 @@ class Parser(object):
             parsed_json = json.load(f)
         return self.dict_to_grid(parsed_json)
 
-    def dict_to_grid(self, dic):
+    @staticmethod
+    def dict_to_grid(dic):
         """
         Converts a dictionary to a maze grid.
         :return: a grid object structured following the given dictionary
@@ -107,12 +107,12 @@ class Parser(object):
         parsed_grid = Grid(start_coord=start_pos, end_coord=end_pos, rows=rows, cols=cols, spots=spots)
         return parsed_grid
 
-    def ASCII_file_to_dict(self):
+    def ascii_file_to_dict(self):
         """
-        Converts a maze from ASCII format to dictionary
+        Converts a maze from ascii format to dictionary
         :return: the dictionary containing the maze map
         """
-        maze_path = pathlib.Path.cwd().parent.joinpath('res', self.src_ASCII_path)
+        maze_path = pathlib.Path.cwd().parent.joinpath('res', self.src_ascii_path)
         lines = []
         with open(maze_path, 'r') as f:
             for line in f:
@@ -147,7 +147,7 @@ class Parser(object):
         maze_dict['maze'] = cells
         return maze_dict
 
-    def dict_to_json(self, dic):
+    def save_dict_to_json(self, dic):
         """
         Writes a dictionary to the given json file
         :param dic: the dictionary that has to be written
@@ -157,20 +157,23 @@ class Parser(object):
             json.dump(dic, file_path)
         pass
 
-    def ASCII_to_grid(self):
+    def ascii_to_grid(self):
         """
-        Creates a maze grid from a ASCII string contained in the given file
-        :return: the grid created from the parsed ASCII string
+        Creates a maze grid from a ascii string contained in the given file
+        :return: the grid created from the parsed ascii string
         """
-        parsed_dict = self.ASCII_file_to_dict()
+        parsed_dict = self.ascii_file_to_dict()
         parsed_grid = self.dict_to_grid(parsed_dict)
         return parsed_grid
 
-    def display_maze_from_dict(self, maze, print_on_console):
+    def display_maze_from_dict(self, maze, save_to_file, print_on_console, is_solved):
         """
-        Prints the maze map using ASCII character
+        Converts the maze map using ascii character
         :param maze: the map that needs to be converted
+        :param save_to_file: save the maze to file if True
         :param print_on_console: print the maze on the console if True
+        :param is_solved: flag that tells if the maze passed as parameter
+            is already solved (contains cells of type: 'solution')
         :return: the structure of the maze just printed
         """
         lines = []
@@ -184,24 +187,50 @@ class Parser(object):
             if print_on_console:
                 print(ascii_line)
             lines.append(ascii_line)
-        return '\n'.join(lines)
 
-    def display_solution(self, maze, maze_solution, save_to_file=True):
+        ascii_maze = '\n'.join(lines)
+
+        if save_to_file:
+            if is_solved:
+                # save to destination file
+                file_path = pathlib.Path.cwd().parent.joinpath('res', self.dst_ascii_path)
+            else:
+                # save to source file
+                file_path = pathlib.Path.cwd().parent.joinpath('res', self.src_ascii_path)
+            with open(file_path, 'w') as f:
+                f.write(ascii_maze)
+
+        return ascii_maze
+
+    def display_solution_from_dict(self, maze, maze_solution, save_to_file, print_on_console):
         """
         Prints the maze map with the solution calculated and saves it to an external file
         :param maze: the maze without the solution path
         :param maze_solution: the list of spots to follow to complete the maze
+        :return: the solved maze converted to ascii format
         """
         print(f"Maze: {maze}")
-        # merge the two dictionaries
-        maze_solved = {**maze, **maze_solution}
+        print(f"Solution: {maze_solution}")
 
-        maze_solved_ascii = self.display_maze_from_dict(maze=maze_solved, print_on_console=False)
-        if save_to_file:
-            maze_solved_file_path = pathlib.Path().parent.joinpath('res', self.dst_ASCII_path)
-            with open(maze_solved_file_path, 'w') as f:
-                f.write(maze_solved_ascii)
-        pass
+        # TODO save the start and the ending cells after the merge operation
+        rows = maze['rows']
+        cols = maze['cols']
+
+        # merge the maze with the solution giving the priority to the solution
+        merged_dict_list = merge_dict_lists_on_specific_keys_with_priority(l1=maze['maze'], l2=maze_solution,
+                                                                           duplicates=False,
+                                                                           priority=2,
+                                                                           comparison_keys=['x', 'y'])
+        print(f"Merged dicts: {merged_dict_list}")
+        # reconstruct the maze in order to display and save it
+        solved_maze = {
+            'rows': rows,
+            'cols': cols,
+            'maze': merged_dict_list
+        }
+        maze_solved_ascii = self.display_maze_from_dict(maze=solved_maze, save_to_file=save_to_file,
+                                                        print_on_console=print_on_console, is_solved=True)
+        return maze_solved_ascii
 
     def path_to_moves(self, maze_solution_path, starting_orientation='N'):
         """
@@ -221,7 +250,7 @@ class Parser(object):
                                                                      previous_orientation=current_orientation,
                                                                      starting_move=starting_move)
             actions += next_actions
-        return
+        return actions
 
     def move_to_actions(self, current_cell, next_cell, previous_orientation, starting_move):
         """

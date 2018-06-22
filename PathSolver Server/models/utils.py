@@ -71,7 +71,7 @@ def merge_keys_in_dict_list(lst, keys_to_merge):
     return dst_list
 
 
-def merge_dict_lists_with_priority(l1, l2, duplicates, priority, comparison_keys):
+def merge_dict_lists_on_specific_keys_with_priority(l1, l2, duplicates, priority, comparison_keys):
     """
     Merge two lists
     :param l1: the first list
@@ -98,7 +98,7 @@ def merge_dict_lists_with_priority(l1, l2, duplicates, priority, comparison_keys
             for ml1 in merged_l1:
                 # since we update merged_l2 every time we have a match,
                 # checking if it has any element can save a lot of time
-                if len(merged_l2):
+                if len(merged_l2) == 0:
                     index = -1
                 else:
                     index = find_dict_index_in_dict_list(merged_l2, comparison_tuple, ml1[comparison_tuple])
