@@ -87,47 +87,68 @@ class Maze_Parser(object):
         return self.dict_to_grid(parsed_json)
 
     @staticmethod
-    def dict_to_grid(dic):
+    def dict_to_grid(maze):
         """
         Converts a dictionary to a maze grid.
+        :param maze: the dictionary of the maze that has to be converted
         :return: a grid object structured following the given dictionary
         """
-        rows = dic['rows']
-        cols = dic['cols']
-        start_pos_cell = dic['maze'][find_dict_index_in_dict_list(dic['maze'], 'type', 'start')]
-        end_pos_cell = dic['maze'][find_dict_index_in_dict_list(dic['maze'], 'type', 'end')]
+        print(f"Rows: {type(maze)}")
+
+        rows = maze['rows']
+        cols = maze['cols']
+        start_pos_cell = maze['maze'][find_dict_index_in_dict_list(maze['maze'], 'type', 'start')]
+        end_pos_cell = maze['maze'][find_dict_index_in_dict_list(maze['maze'], 'type', 'end')]
         start_pos = {'x': start_pos_cell['x'], 'y': start_pos_cell['y']}
         end_pos = {'x': end_pos_cell['x'], 'y': end_pos_cell['y']}
 
         spots = []
-        for s in dic['maze']:
+        for s in maze['maze']:
             parsed_spot = Spot(x=s['x'], y=s['y'], spot_type=s['type'])
             spots.append(parsed_spot)
 
         parsed_grid = Grid(start_coord=start_pos, end_coord=end_pos, rows=rows, cols=cols, spots=spots)
         return parsed_grid
 
-    def ascii_file_to_dict(self):
+    def ascii_to_dict(self, maze, load_from_file):
         """
         Converts a maze from ascii format to dictionary
+        :param maze: the maze that is going to be converted
+        :param load_from_file: load ascii string from file if set to True
         :return: the dictionary containing the maze map
         """
-        maze_path = pathlib.Path.cwd().parent.joinpath('res', self.src_ascii_path)
+        # load maze lines
+        maze_lines = []
+
+        if load_from_file:
+            maze_path = pathlib.Path.cwd().parent.joinpath('res', self.src_ascii_path)
+            with open(maze_path, 'r') as f:
+                for line in f:
+                    maze_lines = line
+        else:
+            print(f"Maze: {maze}\n"
+                  f"type: {type(maze)}")
+            maze_lines = maze.split('\\n')
+
+        #  print(f"Maze lines: {maze_lines}\ntype: {type(maze_lines)}")
+
+        # string processing
         lines = []
-        with open(maze_path, 'r') as f:
-            for line in f:
-                if line != '':
-                    line = re.sub(r"(\d|\s)+", '', line)  # remove any digit or whitespace
-                    if len(line) == 0:  # skip line if empty
-                        continue
-                    else:
-                        line = re.sub(r"'+", '', line)  # remove new lines characters
-                        line = re.sub(r"$\n", '', line)  # remove superscript characters
-                        lines.append(line)
+        for line in maze_lines:
+            if line != '':
+                line = re.sub(r"(\d|\s)+", '', line)  # remove any digit or whitespace
+                if len(line) == 0:  # skip line if empty
+                    continue
+                else:
+                    line = re.sub(r"'+", '', line)  # remove new lines characters
+                    line = re.sub(r"\\n", '', line)  # remove superscript characters
+                    lines.append(line)
+
+        print(f"Lines {lines}")
 
         conversion_map = swap_key_value(self.item_types)
 
-        # init dst dictionary
+        # structure extraction
         maze_dict = {
             'timestamp': int(time.time()),
             'rows': len(lines),
@@ -157,12 +178,15 @@ class Maze_Parser(object):
             json.dump(dic, file_path)
         pass
 
-    def ascii_to_grid(self):
+    def ascii_to_grid(self, maze, load_from_file):
         """
         Creates a maze grid from a ascii string contained in the given file
+        :param maze: the string that is going to be converted
+        :param load_from_file: load ascii string from file if set to True
         :return: the grid created from the parsed ascii string
         """
-        parsed_dict = self.ascii_file_to_dict()
+        parsed_dict = self.ascii_to_dict(maze=maze, load_from_file=load_from_file)
+        print(f"Parsed dictionary: {parsed_dict}")
         parsed_grid = self.dict_to_grid(parsed_dict)
         return parsed_grid
 
@@ -216,7 +240,6 @@ class Maze_Parser(object):
         :return: the solved maze in dict format
         """
 
-        # TODO save the start and the ending cells after the merge operation
         rows = maze['rows']
         cols = maze['cols']
 

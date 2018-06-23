@@ -1,17 +1,17 @@
-from flask import Flask
+from flask import Flask, request
+
+from models.maze_interface import solve_maze
 
 app = Flask(__name__)
 
 
-@app.route('/')
-def hello_world():
-    return 'Hello World!'
+@app.route('/', methods=['GET'])
+def solve():
+    args = request.args.to_dict()
+    entity_actions = solve_maze(maze=args['maze'],
+                                starting_orientation=args['starting_orientation'])
+    return entity_actions
 
-
-@app.route('/', methods=['GET', 'POST'])
-def find_path():
-    # TODO
-    pass
 
 
 # run here
