@@ -37,12 +37,16 @@ def solve_maze(maze, starting_orientation, path_alternatives=0):
 
         # convert the solution to entity moves and save it to external file in JSON format
         moves = parser.path_to_moves(maze_solution_path=solution, starting_orientation=starting_orientation)
-        print(f"Starting orientation: {starting_orientation}\n"
-              f"Moves: {moves}\n"
-              f"Solution steps: {len(solution)}\n"
-              f"Entity moves: {len(moves)}\n"
-              f"Compression rate: {len(moves)/len(solution):.3f}")
-        return moves
+        solution_steps = len(solution)
+        entity_moves = len(moves)
+        compression_rate = entity_moves / solution_steps
+
+        # print(f"Starting orientation: {starting_orientation}\n"
+        #       f"Moves: {moves}\n"
+        #       f"Solution steps: {solution_steps}\n"
+        #       f"Entity moves: {entity_moves}\n"
+        #       f"Compression rate: {compression_rate:.3f}")
+        return moves, solution_steps, entity_moves, compression_rate
     else:
         # no path found
         return '0'

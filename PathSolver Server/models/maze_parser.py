@@ -236,6 +236,8 @@ class Maze_Parser(object):
         """
         Prints the maze map with the solution calculated and saves it to an external file
         :param maze: the maze without the solution path
+        :param save_to_file: save to external file if True
+        :param print_on_console: print the solution to the console if True
         :param maze_solution: the list of spots to follow to complete the maze
         :return: the solved maze in dict format
         """
