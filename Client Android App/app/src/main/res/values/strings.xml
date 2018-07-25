@@ -9,5 +9,9 @@
     <string name="stop">STOP</string>
     <string name="status">Status</string>
     <string name="title_activity_home">Home</string>
+    <string name="ok">Sure</string>
+    <string name="cancel">No, thanks</string>
+    <string name="dialog_message">Looks like Bluetooth is not enabled. Do you want to enable it?</string>
+    <string name="dialog_title">Use Bluetooth?</string>
 
 </resources>

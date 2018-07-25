@@ -13,13 +13,18 @@ def solve():
             to follow in order to solve the maze
     """
     args = request.args.to_dict()
-    entity_actions, solution_steps, entity_moves, compression_rate = solve_maze(maze=args['maze'],
-                                                                                starting_orientation=args[
-                                                                                    'starting_orientation'])
-    if entity_actions == '0':
-        return jsonify(entity_actions)
-    else:
-        return jsonify(entity_actions, solution_steps, entity_moves, compression_rate)
+    maze = args['maze']
+    starting_orientation = args['starting_orientation']
+    solution = solve_maze(maze=maze, starting_orientation=starting_orientation)
+    # solution = {'moves': moves, 'solution_steps': solution_steps,
+    # 'entity_moves': entity_moves, 'compression_rate': compression_rate}
+
+    print(f"Starting orientation: {starting_orientation}\n"
+          f"Moves: {solution['moves']}\n"
+          f"Solution steps: {solution['solution_steps']}\n"
+          f"Entity moves: {solution['entity_moves']}\n"
+          f"Compression rate: {solution['entity_moves']:.3f}")
+    return jsonify(solution)
 
 
 # run here

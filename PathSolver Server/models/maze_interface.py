@@ -46,10 +46,12 @@ def solve_maze(maze, starting_orientation, path_alternatives=0):
         #       f"Solution steps: {solution_steps}\n"
         #       f"Entity moves: {entity_moves}\n"
         #       f"Compression rate: {compression_rate:.3f}")
-        return moves, solution_steps, entity_moves, compression_rate
+
+        return {'moves': moves, 'solution_steps': solution_steps,
+                'entity_moves': entity_moves, 'compression_rate': compression_rate}
     else:
         # no path found
-        return '0'
+        return {'moves': '0'}
 
 
 def random_maze(size, start, end, obstacle_rate):
