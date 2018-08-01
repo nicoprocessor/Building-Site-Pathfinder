@@ -3,109 +3,193 @@ package com.unibs.bulidingsitepathfinder;
 import android.bluetooth.BluetoothAdapter;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.graphics.Color;
 import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
+import android.net.wifi.WifiManager;
 import android.os.Bundle;
+import android.support.constraint.ConstraintLayout;
+import android.support.constraint.ConstraintSet;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.Toast;
 
-public class SetupActivity extends AppCompatActivity implements AdapterView.OnItemSelectedListener {
-    private final int maxHeight = 10;
-    private final int maxWidth = 10;
-    private final String DEBUG_TAG = "NetworkStatusExample";
+import org.w3c.dom.Text;
 
-    private Button network_btn;
-    private Button findPath_btn;
-    private Button reset_btn;
-    private Button test_btn;
+import java.util.ArrayList;
+
+public class SetupActivity extends AppCompatActivity {
+    private final int maxRows = 10;
+    private final int maxCols = 10;
+    private final int default_size = 5;
+
+    private int selectedCols, selectedRows;
+    private boolean isBTConnected, isServerConnected;
+
+    private Button findPathBtn, refreshBtn;
+    private TextView obstaclesCount, freeSpotsCount, robotPosition, targetPosition;
     private AlertDialog.Builder builder;
-
-    //    private int selectedWidth, selectedHeight;
-    Spinner heightSpinner, widthSpinner;
+    private ConstraintLayout grid;
+    private ImageView rowsIcon, colsIcon;
+    private Spinner rowSpinner, colSpinner;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_setup);
+        getWindow().getDecorView().setBackgroundColor(Color.WHITE);
 
-//        LinearLayout lm = findViewById(R.id.linearMain);
-//
-//        //Layout parameters used to display buttons
-//        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
-//                LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-//
-//        //Create four
-//        for (int index = 0; index <= 4; index++) {
-//            LinearLayout innerLayout = new LinearLayout(this);
-//            innerLayout.setOrientation(LinearLayout.HORIZONTAL);
-//
-//            // Create Button
-//            Button btn = new Button(this);
-//            // Give button an ID
-//            btn.setId(index + 1);
-//            btn.setText("test");
-//            btn.setLayoutParams(params);
-//
-//            final int indexBtn = index;
-//            // Set click listener for button
-//            btn.setOnClickListener(new View.OnClickListener() {
-//                public void onClick(View v) {
-//                    Toast.makeText(getApplicationContext(),
-//                            "Clicked Button Index :" + indexBtn,
-//                            Toast.LENGTH_SHORT).show();
-//                }
-//            });
-//
-//            //Add button to LinearLayout
-//            innerLayout.addView(btn);
-//            //Add button to LinearLayout defined in XML
-//            lm.addView(innerLayout);
+        // Layout components init
+        findPathBtn = this.findViewById(R.id.findPathButton);
+        refreshBtn = this.findViewById(R.id.resetButton);
+
+        obstaclesCount = this.findViewById(R.id.obstaclesCountTextView);
+        freeSpotsCount = this.findViewById(R.id.freeSpotsTextView);
+        robotPosition = this.findViewById(R.id.robotPositionTextView);
+        targetPosition = this.findViewById(R.id.targetPositionTextView);
+
+        rowSpinner = findViewById(R.id.rowSpinner);
+        colSpinner = findViewById(R.id.colSpinner);
+
+        int rows = 1;
+        int cols = 2;
+
+        grid = findViewById(R.id.gridConstraintLayout);
+//        grid.setBackgroundColor(Color.CYAN);
+
+        ArrayList<ArrayList<TextView>> gridButtons = new ArrayList<>();
+
+        int[] chainIds = new int[rows * cols];
+        float[] colWeights = new float[cols];
+
+        ArrayList<TextView> currentCol = new ArrayList<>();
+        ConstraintSet constraints = new ConstraintSet();
+
+        for (int r = 0; r < rows; r++) {
+            for (int c = 0; c < cols; c++) {
+                TextView tv = new TextView(this.getApplicationContext());
+                int viewIndex = c + c * r;
+                tv.setText(String.valueOf(viewIndex));
+                tv.setId(viewIndex);
+                tv.setOnClickListener(new View.OnClickListener() {
+                                          @Override
+                                          public void onClick(View v) {
+                                              Log.d("Text View pressed", String.valueOf(tv.getId()));
+                                          }
+                                      }
+                );
+                tv.setClickable(true);
+                tv.setBackgroundResource(R.drawable.rounded_corner);
+                tv.setTextColor(R.color.colorPrimary);
+                tv.setMinWidth(100);
+                tv.setElevation(10);
+                tv.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
+                tv.setPadding(10, 10, 10, 10);
+
+//                tv.setLayoutParams(new ConstraintLayout.LayoutParams(
+//                        tv.getMinWidth(),
+//                        ConstraintLayout.LayoutParams.WRAP_CONTENT));
+
+                chainIds[viewIndex] = tv.getId();
+                grid.addView(tv, viewIndex);
+                colWeights[viewIndex] = 1;
+                currentCol.add(tv);
+            }
+        }
+
+        Log.d("Debugging responsive grid", String.valueOf(grid.getViewById(0).getId()));
+        Log.d("Debugging responsive grid", String.valueOf(grid.getViewById(1).getId()));
+
+
+        constraints.clone(grid);
+
+
+        constraints.createHorizontalChain(grid.getId(), ConstraintSet.LEFT, grid.getId(), ConstraintSet.RIGHT,
+                chainIds, null, ConstraintSet.CHAIN_SPREAD);
+
+
+//        for (int i = 0; i < row.size(); i++) {
+//            row.get(i).setLayoutParams(new ConstraintLayout.LayoutParams(
+//                    ConstraintLayout.LayoutParams.MATCH_CONSTRAINT_SPREAD,
+//                    ConstraintLayout.LayoutParams.WRAP_CONTENT));
 //        }
 
-//         //Spinner element
-//        heightSpinner = findViewById(R.id.heightSpinner);
-//        heightSpinner.setOnItemSelectedListener(this);
-//
-//        widthSpinner = findViewById(R.id.widthSpinner);
-//        widthSpinner.setOnItemSelectedListener(this);
-//
-//        ArrayList<String> availableHeights = new ArrayList<>();
-//        ArrayList<String> availableWeights = new ArrayList<>();
-//
-//
-//        for (int i = 2; i < maxHeight + 1; i++)
-//            availableHeights.add(String.valueOf(i));
-//
-//        for (int i = 2; i < maxWidth + 1; i++)
-//            availableWeights.add(String.valueOf(i));
-//
-//        // Creating adapter for spinner
-//        ArrayAdapter<String> dataAdapterHeights = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, availableHeights);
-//        ArrayAdapter<String> dataAdapterWidths = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, availableWeights);
-//
-//        // Drop down layout style - list view with radio button
-//        dataAdapterHeights.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-//        dataAdapterWidths.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-//
-//        // attaching data adapter to spinner
-//        heightSpinner.setAdapter(dataAdapterHeights);
-//        widthSpinner.setAdapter(dataAdapterWidths);
+        constraints.applyTo(grid);
 
-//        network_btn = this.findViewById(R.id.networkButton);
-        findPath_btn = this.findViewById(R.id.findPathButton);
-        reset_btn = this.findViewById(R.id.resetButton);
-//        test_btn = this.findViewById(R.id.testDialogButton);
+//        for (int c = 0; c < btnCols; c++) {
+//            for (int r = 0; r < btnRows; r++) {
+//                Button btn = new Button(this.getActivity().getApplicationContext());
+//                int btnIndex = r + c * r;
+//                btn.setId(btnIndex);
+//                btn.setText(String.valueOf(btnIndex));
+//                btn.setLayoutParams(new ConstraintLayout.LayoutParams(
+//                        150,
+//                        ConstraintLayout.LayoutParams.WRAP_CONTENT));
+//
+//                chainIds[btnIndex] = btn.getId();
+//                grid.addView(btn, btnIndex);
+//                rowBtns.add(btn);
+//            }
+//        }
+
+//        constraints.clone(grid);
+//
+//        constraints.createHorizontalChain(grid.getId(), ConstraintSet.LEFT, grid.getId(), ConstraintSet.RIGHT,
+//                chainIds, null, ConstraintSet.CHAIN_SPREAD);
+//
+//        constraints.applyTo(grid);
 
 
-//        Log.d(DEBUG_TAG, "Wifi connected: " + isWifiConn);
-//        Log.d(DEBUG_TAG, "Mobile connected: " + isMobileConn);
-//        Log.d(DEBUG_TAG, "Bluetooth connected: " + isBTConn);
+//        Display display = getWindowManager().getDefaultDisplay();
+//        Point size = new Point();
+//        display.getSize(size);
+//        int displayWidth = size.x;
+//        int displayHeight = size.y;
+
+//        updateGrid(3, 1);
+
+        // Attaching listeners to spinners
+        rowSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
+                rowSpinner.setSelection(Integer.parseInt(parent.getSelectedItem().toString()) - 3);
+//                Toast.makeText(getApplicationContext(), parent.getItemAtPosition(pos).toString(), Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> arg0) {
+                rowSpinner.setSelection(R.string.default_size);
+            }
+        });
+
+        colSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
+                colSpinner.setSelection(Integer.parseInt(parent.getSelectedItem().toString()) - 3);
+//                Toast.makeText(getApplicationContext(), parent.getItemAtPosition(pos).toString(), Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> arg0) {
+                colSpinner.setSelection(R.string.default_size);
+            }
+        });
+
+
+        // onCreate routine
+//        isServerConnected = checkWiFiEnabled();
+//
+//        if (!isServerConnected)
+//            askEnableWifi();
+
 
         // Next example
 
@@ -133,44 +217,53 @@ public class SetupActivity extends AppCompatActivity implements AdapterView.OnIt
 //        queue.add(stringRequest);
     }
 
-    public void displayNetworkStatus(View v) {
+    /**
+     * Checks if the Bluetooth is enabled and connected
+     *
+     * @return true if Bluetooth module is connected, else false
+     */
+    public boolean checkBluetoothEnabled() {
         ConnectivityManager connMgr = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo networkInfo;
-
-        boolean isWifiConn = false;
-        boolean isBTConn = false;
-
-        // just to satisfy the compiler
-        if (connMgr != null) {
-            Log.d(DEBUG_TAG, "Hello");
-            networkInfo = connMgr.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
-            isWifiConn = networkInfo.isConnected();
-            networkInfo = connMgr.getNetworkInfo(ConnectivityManager.TYPE_BLUETOOTH);
-            isBTConn = networkInfo.isConnected();
-        }
-
-        Toast.makeText(this.getApplicationContext(), "Wifi is connected: " + isWifiConn, Toast.LENGTH_SHORT).show();
-        Toast.makeText(this.getApplicationContext(), "Bluetooth is connected: " + isBTConn, Toast.LENGTH_SHORT).show();
+        return connMgr != null && connMgr.getNetworkInfo(ConnectivityManager.TYPE_BLUETOOTH).isConnected();
     }
 
-    public void checkBluetoothConnection(View v) {
-        final BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+    /**
+     * Checks if the WiFi is enabled
+     *
+     * @return true if WiFi module is enabled, else false
+     */
+    public boolean checkWiFiEnabled() {
+        ConnectivityManager connMgr = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        return connMgr != null && connMgr.getNetworkInfo(ConnectivityManager.TYPE_WIFI).isConnected();
+    }
 
-        if (!mBluetoothAdapter.isEnabled()) {
-            Log.d("TEST DIALOG", "Hey there!");
+    /**
+     * Ask the user to enable automatically the Wifi
+     */
+    public void askEnableWifi() {
+        final WifiManager wifiManager = (WifiManager) this.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+
+        if (!checkWiFiEnabled()) {
+            // Create an AlertDialog in order to ask to the user to enable automatically the WiFi module
             builder = new AlertDialog.Builder(this.getActivity());
 
-            builder.setMessage(R.string.dialog_message);
-            builder.setTitle(R.string.dialog_title);
+            builder.setMessage(R.string.dialog_message_WiFi);
+            builder.setTitle(R.string.dialog_title_WiFi);
+
             builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int id) {
-                    mBluetoothAdapter.enable();
-
+                    if (wifiManager != null) {
+                        wifiManager.setWifiEnabled(true);
+                        Toast.makeText(SetupActivity.this.getApplicationContext(), "Done!", Toast.LENGTH_SHORT).show();
+                    } else {
+                        Toast.makeText(SetupActivity.this.getApplicationContext(), "Oops!", Toast.LENGTH_SHORT).show();
+                    }
                 }
             });
+
             builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int id) {
-                    // User cancelled the dialog
+                    // Do nothing
                 }
             });
 
@@ -179,18 +272,60 @@ public class SetupActivity extends AppCompatActivity implements AdapterView.OnIt
         }
     }
 
-    @Override
-    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-        String selectedItem = parent.getSelectedItem().toString();
-        Toast.makeText(this, selectedItem, Toast.LENGTH_SHORT).show();
+    /**
+     * Ask the user to enable automatically the Bluetooth module
+     */
+    public void askEnableBluetooth() {
+        final BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+
+        if (!checkBluetoothEnabled()) {
+            // Create an AlertDialog in order to ask to the user to enable automatically the BT module
+            builder = new AlertDialog.Builder(this.getActivity());
+
+            builder.setMessage(R.string.dialog_message_BT);
+            builder.setTitle(R.string.dialog_title_BT);
+
+            builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int id) {
+                    mBluetoothAdapter.enable();
+                    Toast.makeText(SetupActivity.this.getApplicationContext(), "Done!", Toast.LENGTH_SHORT).show();
+                }
+            });
+
+            builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int id) {
+                    // Do nothing
+                }
+            });
+
+            AlertDialog dialog = builder.create();
+            dialog.show();
+        }
     }
 
-    @Override
-    public void onNothingSelected(AdapterView<?> parent) {
+    /**
+     * Send the current instance of the maze to the server if everything is connected.
+     * This method is linked to the onClick action of the findPath button.
+     *
+     * @param view findPath button
+     */
+    public void sendInstance(View view) {
+        //TODO
+    }
 
+    /**
+     * Resets the site configuration to the default settings.
+     * This method is linked to the onClick action of the reset button
+     *
+     * @param v reset button
+     */
+    public void resetGrid(View v) {
+        //TODO
     }
 
     public Context getActivity() {
         return this;
     }
 }
+
+

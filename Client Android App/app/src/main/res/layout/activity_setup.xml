@@ -3,10 +3,12 @@
 <android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/activity_setup"
+    android:id="@+id/mainConstraintLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".SetupActivity">
+    android:animateLayoutChanges="true"
+    tools:context=".SetupActivity"
+    tools:layout_editor_absoluteY="81dp">
 
     <ImageView
         android:id="@+id/imageView9"
@@ -18,7 +20,7 @@
         app:srcCompat="@drawable/ic_bullseye_arrow_black_24dp" />
 
     <TextView
-        android:id="@+id/textView10"
+        android:id="@+id/targetPositionTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginEnd="24dp"
@@ -38,37 +40,45 @@
         app:srcCompat="@drawable/ic_robot_black_24dp" />
 
     <TextView
-        android:id="@+id/textView9"
+        android:id="@+id/robotPositionTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginStart="2dp"
         android:layout_marginTop="2dp"
         android:text=": [0,0]"
         app:layout_constraintStart_toEndOf="@+id/imageView8"
         app:layout_constraintTop_toTopOf="@+id/imageView8" />
 
     <Spinner
-        android:id="@+id/heightSpinner"
+        android:id="@+id/rowSpinner"
         android:layout_width="70dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="8dp"
-        android:dropDownWidth="70dp"
-        android:minWidth="70dp"
+        android:layout_height="30dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="4dp"
+        android:background="@android:color/background_light"
+        android:dropDownWidth="50dp"
+        android:entries="@array/size_array"
+        android:minWidth="50dp"
+        android:popupElevation="0dp"
+        android:prompt="@string/default_size"
         android:textColor="#000000"
-        app:layout_constraintStart_toEndOf="@+id/imageView"
-        app:layout_constraintTop_toTopOf="@+id/imageView" />
+        app:layout_constraintStart_toEndOf="@+id/rowsImageView"
+        app:layout_constraintTop_toTopOf="@+id/rowsImageView" />
 
     <Spinner
-        android:id="@+id/widthSpinner"
+        android:id="@+id/colSpinner"
         android:layout_width="70dp"
-        android:layout_height="wrap_content"
+        android:layout_height="30dp"
         android:layout_marginEnd="32dp"
-        android:layout_marginTop="8dp"
-        android:dropDownWidth="70dp"
-        android:minWidth="70dp"
+        android:background="@android:color/background_light"
+        android:dropDownWidth="50dp"
+        android:entries="@array/size_array"
+        android:minWidth="50dp"
+        android:popupElevation="0dp"
+        android:prompt="@string/default_size"
         android:textColor="#000000"
-        app:layout_constraintEnd_toEndOf="@+id/linearMain"
-        app:layout_constraintTop_toTopOf="@+id/imageView2" />
+        app:layout_constraintBaseline_toBaselineOf="@+id/rowSpinner"
+        app:layout_constraintEnd_toEndOf="parent" />
 
     <Button
         android:id="@+id/findPathButton"
@@ -76,6 +86,7 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="64dp"
+        android:onClick="sendInstance"
         android:text="@string/solve"
         app:layout_constraintBaseline_toBaselineOf="@+id/resetButton"
         app:layout_constraintStart_toStartOf="parent" />
@@ -92,41 +103,27 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
-    <LinearLayout
-        android:id="@+id/linearMain"
-        android:layout_width="395dp"
-        android:layout_height="458dp"
-        android:layout_marginBottom="8dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
-        android:orientation="vertical"
-        app:layout_constraintBottom_toTopOf="@+id/imageView4"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/heightSpinner"></LinearLayout>
-
     <ImageView
-        android:id="@+id/imageView"
+        android:id="@+id/rowsImageView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="32dp"
         android:layout_marginTop="32dp"
-        app:layout_constraintStart_toStartOf="@+id/linearMain"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:srcCompat="@drawable/ic_table_column_black_36dp" />
 
     <ImageView
-        android:id="@+id/imageView2"
+        android:id="@+id/colsImageView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginEnd="16dp"
-        app:layout_constraintEnd_toStartOf="@+id/widthSpinner"
-        app:layout_constraintTop_toTopOf="@+id/imageView"
+        app:layout_constraintEnd_toStartOf="@+id/colSpinner"
+        app:layout_constraintTop_toTopOf="@+id/rowsImageView"
         app:srcCompat="@drawable/ic_table_row_black_36dp" />
 
     <TextView
-        android:id="@+id/textView5"
+        android:id="@+id/freeSpotsTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="2dp"
@@ -148,18 +145,33 @@
         android:id="@+id/imageView7"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="64dp"
+        android:layout_marginStart="50dp"
         app:layout_constraintStart_toEndOf="@+id/imageView4"
         app:layout_constraintTop_toTopOf="@+id/imageView4"
         app:srcCompat="@drawable/ic_wall_black_24dp" />
 
     <TextView
-        android:id="@+id/textView8"
+        android:id="@+id/obstaclesCountTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="2dp"
-        android:text=": 100"
+        android:text=": 0"
         app:layout_constraintStart_toEndOf="@+id/imageView7"
         app:layout_constraintTop_toTopOf="@+id/imageView7" />
+
+    <android.support.constraint.ConstraintLayout
+        android:id="@+id/gridConstraintLayout"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginBottom="32dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="32dp"
+        app:layout_constraintBottom_toTopOf="@+id/imageView4"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/rowsImageView">
+
+    </android.support.constraint.ConstraintLayout>
 
 </android.support.constraint.ConstraintLayout>
