@@ -1,0 +1,52 @@
+{
+  "timestamp": 1529677421,
+  "rows": 3,
+  "cols": 3,
+  "maze": [
+    {
+      "x": 0,
+      "y": 0,
+      "type": "start"
+    },
+    {
+      "x": 0,
+      "y": 1,
+      "type": "obstacle"
+    },
+    {
+      "x": 0,
+      "y": 2,
+      "type": "traversable"
+    },
+    {
+      "x": 1,
+      "y": 0,
+      "type": "traversable"
+    },
+    {
+      "x": 1,
+      "y": 1,
+      "type": "traversable"
+    },
+    {
+      "x": 1,
+      "y": 2,
+      "type": "obstacle"
+    },
+    {
+      "x": 2,
+      "y": 0,
+      "type": "traversable"
+    },
+    {
+      "x": 2,
+      "y": 1,
+      "type": "traversable"
+    },
+    {
+      "x": 2,
+      "y": 2,
+      "type": "end"
+    }
+  ]
+}
