@@ -17,7 +17,7 @@
         android:layout_marginEnd="72dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="@+id/imageView4"
-        app:srcCompat="@drawable/ic_bullseye_arrow_black_24dp" />
+        app:srcCompat="@drawable/ic_android_head_black_24dp" />
 
     <TextView
         android:id="@+id/targetPositionTextView"
@@ -37,7 +37,7 @@
         android:layout_marginEnd="50dp"
         app:layout_constraintEnd_toStartOf="@+id/imageView9"
         app:layout_constraintTop_toTopOf="@+id/imageView4"
-        app:srcCompat="@drawable/ic_robot_black_24dp" />
+        app:srcCompat="@drawable/ic_android_head_black_24dp" />
 
     <TextView
         android:id="@+id/robotPositionTextView"
@@ -53,8 +53,7 @@
         android:id="@+id/rowSpinner"
         android:layout_width="70dp"
         android:layout_height="30dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="4dp"
+        android:layout_marginStart="16dp"
         android:background="@android:color/background_light"
         android:dropDownWidth="50dp"
         android:entries="@array/size_array"
@@ -63,7 +62,8 @@
         android:prompt="@string/default_size"
         android:textColor="#000000"
         app:layout_constraintStart_toEndOf="@+id/rowsImageView"
-        app:layout_constraintTop_toTopOf="@+id/rowsImageView" />
+        app:layout_constraintTop_toTopOf="@+id/rowsImageView"
+        app:srcCompat="@drawable/ic_android_head_black_24dp" />
 
     <Spinner
         android:id="@+id/colSpinner"
@@ -111,7 +111,7 @@
         android:layout_marginTop="32dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@drawable/ic_table_column_black_36dp" />
+        app:srcCompat="@drawable/ic_android_head_black_24dp" />
 
     <ImageView
         android:id="@+id/colsImageView"
@@ -120,7 +120,7 @@
         android:layout_marginEnd="16dp"
         app:layout_constraintEnd_toStartOf="@+id/colSpinner"
         app:layout_constraintTop_toTopOf="@+id/rowsImageView"
-        app:srcCompat="@drawable/ic_table_row_black_36dp" />
+        app:srcCompat="@drawable/ic_android_head_black_24dp" />
 
     <TextView
         android:id="@+id/freeSpotsTextView"
@@ -139,7 +139,7 @@
         android:layout_marginStart="24dp"
         app:layout_constraintBottom_toTopOf="@+id/findPathButton"
         app:layout_constraintStart_toStartOf="parent"
-        app:srcCompat="@drawable/ic_crop_free_black_24dp" />
+        app:srcCompat="@drawable/ic_android_head_black_24dp" />
 
     <ImageView
         android:id="@+id/imageView7"
@@ -148,7 +148,7 @@
         android:layout_marginStart="50dp"
         app:layout_constraintStart_toEndOf="@+id/imageView4"
         app:layout_constraintTop_toTopOf="@+id/imageView4"
-        app:srcCompat="@drawable/ic_wall_black_24dp" />
+        app:srcCompat="@drawable/ic_android_head_black_24dp" />
 
     <TextView
         android:id="@+id/obstaclesCountTextView"
@@ -169,9 +169,118 @@
         android:layout_marginTop="32dp"
         app:layout_constraintBottom_toTopOf="@+id/imageView4"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/rowsImageView">
+        app:layout_constraintTop_toBottomOf="@+id/rowsImageView"
+        app:layout_constraintVertical_bias="1.0">
 
+        <Button
+            android:id="@+id/gridBtn11"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:text="test"
+            style="@android:style/Widget.Material.Button.Colored"
+            app:layout_constraintBottom_toTopOf="@+id/gridBtn21"
+            app:layout_constraintEnd_toStartOf="@+id/gridBtn12"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <Button
+            android:id="@+id/gridBtn12"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:text="test"
+            style="@android:style/Widget.Material.Button.Colored"
+            app:layout_constraintBottom_toTopOf="@+id/gridBtn22"
+            app:layout_constraintEnd_toStartOf="@+id/gridBtn13"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toEndOf="@+id/gridBtn11"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <Button
+            android:id="@+id/gridBtn13"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:text="test"
+            style="@android:style/Widget.Material.Button.Colored"
+            app:layout_constraintBottom_toTopOf="@+id/gridBtn23"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toEndOf="@+id/gridBtn12"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <Button
+            android:id="@+id/gridBtn21"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:text="test"
+            style="@android:style/Widget.Material.Button.Colored"
+            app:layout_constraintBottom_toTopOf="@+id/gridBtn31"
+            app:layout_constraintEnd_toStartOf="@+id/gridBtn22"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/gridBtn11" />
+
+        <Button
+            android:id="@+id/gridBtn22"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:text="test"
+            style="@android:style/Widget.Material.Button.Colored"
+            app:layout_constraintBottom_toTopOf="@+id/gridBtn32"
+            app:layout_constraintEnd_toStartOf="@+id/gridBtn23"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toEndOf="@+id/gridBtn21"
+            app:layout_constraintTop_toBottomOf="@+id/gridBtn12" />
+
+        <Button
+            android:id="@+id/gridBtn23"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:text="test"
+            style="@android:style/Widget.Material.Button.Colored"
+            app:layout_constraintBottom_toTopOf="@+id/gridBtn33"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toEndOf="@+id/gridBtn22"
+            app:layout_constraintTop_toBottomOf="@+id/gridBtn13" />
+
+        <Button
+            android:id="@+id/gridBtn31"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:text="test"
+            style="@android:style/Widget.Material.Button.Colored"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/gridBtn32"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/gridBtn21" />
+
+        <Button
+            android:id="@+id/gridBtn32"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:text="test"
+            style="@android:style/Widget.Material.Button.Colored"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/gridBtn33"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toEndOf="@+id/gridBtn31"
+            app:layout_constraintTop_toBottomOf="@+id/gridBtn22" />
+
+        <com.unibs.bulidingsitepathfinder.CustomButton
+            android:id="@+id/gridBtn33"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:text="test"
+
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toEndOf="@+id/gridBtn32"
+            app:layout_constraintTop_toBottomOf="@+id/gridBtn23" />
     </android.support.constraint.ConstraintLayout>
 
 </android.support.constraint.ConstraintLayout>
