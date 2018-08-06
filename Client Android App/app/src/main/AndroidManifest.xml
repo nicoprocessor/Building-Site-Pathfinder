@@ -11,9 +11,7 @@
 
     <application
         android:allowBackup="true"
-        android:icon="@mipmap/pathfinder501"
         android:label="@string/app_name"
-        android:roundIcon="@mipmap/pathfinder501"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity android:name=".SetupActivity">

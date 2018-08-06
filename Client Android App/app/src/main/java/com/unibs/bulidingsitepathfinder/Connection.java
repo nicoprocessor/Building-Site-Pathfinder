@@ -48,6 +48,7 @@ public class Connection {
         return sb.toString();
     }
 
+
     /**
      * Tests if the server is online and reachable.
      *

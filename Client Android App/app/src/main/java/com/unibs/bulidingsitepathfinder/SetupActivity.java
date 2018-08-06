@@ -9,6 +9,7 @@ import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.support.constraint.ConstraintLayout;
 import android.support.constraint.ConstraintSet;
+import android.support.constraint.Guideline;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -57,19 +58,21 @@ public class SetupActivity extends AppCompatActivity {
         rowSpinner = findViewById(R.id.rowSpinner);
         colSpinner = findViewById(R.id.colSpinner);
 
-        int rows = 1;
-        int cols = 2;
-
         grid = findViewById(R.id.gridConstraintLayout);
-//        grid.setBackgroundColor(Color.CYAN);
+        grid.setBackgroundColor(Color.CYAN);
 
         ArrayList<ArrayList<TextView>> gridButtons = new ArrayList<>();
+        ArrayList<TextView> currentRow = new ArrayList<>();
+        ConstraintSet constraints = new ConstraintSet();
+
+        int rows = 3;
+        int cols = 3;
+
+        if (cols > 3 || rows > 3) {
+            // Add new buttons to the chains
+        }
 
         int[] chainIds = new int[rows * cols];
-        float[] colWeights = new float[cols];
-
-        ArrayList<TextView> currentCol = new ArrayList<>();
-        ConstraintSet constraints = new ConstraintSet();
 
         for (int r = 0; r < rows; r++) {
             for (int c = 0; c < cols; c++) {
@@ -84,44 +87,72 @@ public class SetupActivity extends AppCompatActivity {
                                           }
                                       }
                 );
+                tv.setLayoutParams(new ConstraintLayout.LayoutParams(
+                        ConstraintLayout.LayoutParams.WRAP_CONTENT,
+                        ConstraintLayout.LayoutParams.WRAP_CONTENT
+                ));
                 tv.setClickable(true);
                 tv.setBackgroundResource(R.drawable.rounded_corner);
                 tv.setTextColor(R.color.colorPrimary);
-                tv.setMinWidth(100);
+                tv.setMinWidth(120);
                 tv.setElevation(10);
                 tv.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
                 tv.setPadding(10, 10, 10, 10);
 
-//                tv.setLayoutParams(new ConstraintLayout.LayoutParams(
-//                        tv.getMinWidth(),
-//                        ConstraintLayout.LayoutParams.WRAP_CONTENT));
-
                 chainIds[viewIndex] = tv.getId();
-                grid.addView(tv, viewIndex);
-                colWeights[viewIndex] = 1;
-                currentCol.add(tv);
+//                grid.addView(tv, viewIndex);
+                currentRow.add(tv);
             }
         }
 
-        Log.d("Debugging responsive grid", String.valueOf(grid.getViewById(0).getId()));
-        Log.d("Debugging responsive grid", String.valueOf(grid.getViewById(1).getId()));
+//
+//        constraints.clone(grid);
+
+//        constraints.connect(
+//                currentrow.get(0).getid(), constraintlayout.layoutparams.left,
+//                grid.getid(), constraintlayout.layoutparams.left, 16);
+//
+//        constraints.connect(
+//                currentrow.get(0).getid(), constraintlayout.layoutparams.top,
+//                grid.getid(), constraintlayout.layoutparams.top);
+//
+//        constraints.applyto(grid);
+//
+//        constraints.connect(
+//                currentrow.get(0).getid(), constraintlayout.layoutparams.bottom,
+//                currentrow.get(1).getid(), constraintlayout.layoutparams.bottom);
+//
+//        constraints.connect(
+//                1, constraintlayout.layoutparams.left,
+//                grid.getid(), constraintlayout.layoutparams.right, 16);
+//
+//        constraints.connect(
+//                currentRow.get(1).getId(), ConstraintLayout.LayoutParams.TOP,
+//                currentRow.get(0).getId(), ConstraintLayout.LayoutParams.TOP, 16);
+
+//        Log.d("Testing Responsive Layout", "id tv1: " + String.valueOf(currentRow.get(0).getId()));
+//        Log.d("Testing Responsive Layout", "id tv2: " + String.valueOf(currentRow.get(1).getId()));
+//        Log.d("Testing Responsive Layout", "id grid: " + String.valueOf(grid.getId()));
 
 
-        constraints.clone(grid);
+//        constraints.applyTo(grid);
+
+//        ConstraintSet constraints = new ConstraintSet();
+//        constraints.clone(grid);
 
 
-        constraints.createHorizontalChain(grid.getId(), ConstraintSet.LEFT, grid.getId(), ConstraintSet.RIGHT,
-                chainIds, null, ConstraintSet.CHAIN_SPREAD);
+//        constraints.createHorizontalChain(grid.getId(), ConstraintSet.LEFT, grid.getId(), ConstraintSet.RIGHT,
+//                chainIds, null, ConstraintSet.CHAIN_PACKED);
 
 
-//        for (int i = 0; i < row.size(); i++) {
-//            row.get(i).setLayoutParams(new ConstraintLayout.LayoutParams(
-//                    ConstraintLayout.LayoutParams.MATCH_CONSTRAINT_SPREAD,
-//                    ConstraintLayout.LayoutParams.WRAP_CONTENT));
-//        }
+//        constraints.applyTo(grid);
 
-        constraints.applyTo(grid);
-
+//        int btnCols = 1;
+//        int btnRows = 3;
+//
+//        int[] chainIds = new int[btnCols * btnRows];
+//        ArrayList<Button> rowBtns = new ArrayList<>();
+//
 //        for (int c = 0; c < btnCols; c++) {
 //            for (int r = 0; r < btnRows; r++) {
 //                Button btn = new Button(this.getActivity().getApplicationContext());
@@ -137,13 +168,13 @@ public class SetupActivity extends AppCompatActivity {
 //                rowBtns.add(btn);
 //            }
 //        }
-
+//
 //        constraints.clone(grid);
 //
-//        constraints.createHorizontalChain(grid.getId(), ConstraintSet.LEFT, grid.getId(), ConstraintSet.RIGHT,
+//        constraints.createHorizontalChain(
+//                rowBtns.get(0).getId(), ConstraintSet.LEFT,
+//                rowBtns.get(rowBtns.size() - 1).getId(), ConstraintSet.RIGHT,
 //                chainIds, null, ConstraintSet.CHAIN_SPREAD);
-//
-//        constraints.applyTo(grid);
 
 
 //        Display display = getWindowManager().getDefaultDisplay();
@@ -302,6 +333,7 @@ public class SetupActivity extends AppCompatActivity {
             dialog.show();
         }
     }
+
 
     /**
      * Send the current instance of the maze to the server if everything is connected.
