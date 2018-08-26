@@ -4,4 +4,7 @@
     <color name="primaryLightColor">#bbdefb</color>
     <color name="colorPrimaryDark">#303F9F</color>
     <color name="colorAccent">#2196F3</color>
+    <color name="defaultGridBtn">#EFF6F7</color>
+    <color name="redGridBtn">#CE373A</color>
+    <color name="greenGridBtn">#7FE074</color>
 </resources>
