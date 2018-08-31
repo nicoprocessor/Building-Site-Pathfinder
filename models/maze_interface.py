@@ -28,12 +28,17 @@ def solve_maze(maze, starting_orientation, path_alternatives=0):
     :return: the solution path evaluated
     """
     parsed_grid = parser.ascii_to_grid(maze=maze, load_from_file=False)
-    solution = parsed_grid.a_star(path_alternatives)[1]['path']
 
-    if len(solution) > 0:
+    solution_set = parsed_grid.a_star(path_alternatives)
+
+    if not solution_set[0]:
+        # no path found
+        return {'moves': '0'}
+    else:
         # display solution and save it to external file both in JSON and ascii format
         # solved_maze = parser.display_solution_from_dict(maze=maze, maze_solution=solution, save_to_file=True,
         #                                                 print_on_console=False)
+        solution = parsed_grid.a_star(path_alternatives)[1]['path']
 
         # convert the solution to entity moves and save it to external file in JSON format
         moves = parser.path_to_moves(maze_solution_path=solution, starting_orientation=starting_orientation)
@@ -49,9 +54,6 @@ def solve_maze(maze, starting_orientation, path_alternatives=0):
 
         return {'moves': moves, 'solution_steps': solution_steps,
                 'entity_moves': entity_moves, 'compression_rate': compression_rate}
-    else:
-        # no path found
-        return {'moves': '0'}
 
 
 def random_maze(size, start, end, obstacle_rate):
