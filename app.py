@@ -15,7 +15,6 @@ def solve():
     args = request.args.to_dict()
 
     if 'ping' in args.keys():
-        # print('Hello, it\'s me, the maze solver!')
         return jsonify({'response': 'pong'})
     else:
         maze = args['maze']
@@ -24,11 +23,14 @@ def solve():
         # solution = {'moves': moves, 'solution_steps': solution_steps,
         # 'entity_moves': entity_moves, 'compression_rate': compression_rate}
 
-        print(f"Starting orientation: {starting_orientation}\n"
-              f"Moves: {solution['moves']}\n"
-              f"Solution steps: {solution['solution_steps']}\n"
-              f"Entity moves: {solution['entity_moves']}\n"
-              f"Compression rate: {solution['entity_moves']:.3f}")
+        if solution['moves'] == '0':  # impossible maze
+            print(f"moves: {solution['moves']}\n")
+        else:
+            print(f"Starting orientation: {starting_orientation}\n"
+                  f"Moves: {solution['moves']}\n"
+                  f"Solution steps: {solution['solution_steps']}\n"
+                  f"Entity moves: {solution['entity_moves']}\n"
+                  f"Compression rate: {solution['entity_moves']:.3f}")
     return jsonify(solution)
 
 
