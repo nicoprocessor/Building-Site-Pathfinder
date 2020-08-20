@@ -112,13 +112,6 @@ class Grid(object):
         self.start_spot = self.mesh[start_coord['x']][start_coord['y']]
         self.end_spot = self.mesh[end_coord['x']][end_coord['y']]
 
-    def __str__(self):
-        return "Cols: {}\nRows: {}\nStart: {}\nEnd: {}\nMesh: {}".format(self.cols, self.rows, self.start_spot,
-                                                                         self.end_spot, self.mesh)
-
-    def __repr__(self):
-        pass
-
     def add_neighbors(self, current_spot):
         """
         Evaluate neighbors for the given spot. A neighbor spot is any adjacent spot on
@@ -217,3 +210,10 @@ class Grid(object):
                 print("No path found!")
                 end = time.process_time()
                 return False, {'elapsed_time': end - start}
+
+    def __str__(self):
+        return "Cols: {}\nRows: {}\nStart: {}\nEnd: {}\nMesh: {}".format(self.cols, self.rows, self.start_spot,
+                                                                         self.end_spot, self.mesh)
+
+    def __repr__(self):
+        pass
