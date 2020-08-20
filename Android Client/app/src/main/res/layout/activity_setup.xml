@@ -1,0 +1,278 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/mainConstraintLayout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:animateLayoutChanges="true"
+    tools:context="com.unibs.buildingsitepathfinder.SetupActivity"
+    tools:layout_editor_absoluteY="81dp">
+
+    <ImageView
+        android:id="@+id/imageView9"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="4dp"
+        android:contentDescription=" "
+        app:layout_constraintEnd_toStartOf="@+id/targetPositionTextView"
+        app:layout_constraintTop_toTopOf="@+id/imageView7"
+        app:srcCompat="@drawable/flag_checkered" />
+
+    <TextView
+        android:id="@+id/targetPositionTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="32dp"
+        android:layout_marginTop="2dp"
+        android:text=": [10,10]"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/imageView9" />
+
+    <ImageView
+        android:id="@+id/imageView8"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        app:layout_constraintStart_toStartOf="@+id/resetButton"
+        app:layout_constraintTop_toTopOf="@+id/imageView7"
+        app:srcCompat="@drawable/robot" />
+
+    <TextView
+        android:id="@+id/robotPositionTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="4dp"
+        android:layout_marginTop="2dp"
+        android:text=": [0,0]"
+        app:layout_constraintStart_toEndOf="@+id/imageView8"
+        app:layout_constraintTop_toTopOf="@+id/imageView8" />
+
+    <Spinner
+        android:id="@+id/colSpinner"
+        android:layout_width="70dp"
+        android:layout_height="30dp"
+        android:layout_marginTop="32dp"
+        android:background="@android:color/background_light"
+        android:dropDownWidth="50dp"
+        android:entries="@array/size_array"
+        android:minWidth="50dp"
+        android:popupElevation="0dp"
+        android:prompt="@string/default_size"
+        android:textColor="#000000"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.6"
+        app:layout_constraintStart_toEndOf="@+id/colsImageView"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <Button
+        android:id="@+id/findPathButton"
+        style="@android:style/Widget.Material.Button.Colored"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="32dp"
+        android:layout_marginStart="32dp"
+        android:onClick="sendInstance"
+        android:text="@string/solve"
+        app:layout_constraintBaseline_toBaselineOf="@+id/resetButton"
+        app:layout_constraintEnd_toStartOf="@+id/resetButton"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <Button
+        android:id="@+id/resetButton"
+        style="@android:style/Widget.Material.Button.Colored"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="24dp"
+        android:onClick=""
+        android:text="@string/reset"
+        android:textAlignment="center"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <ImageView
+        android:id="@+id/colsImageView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="16dp"
+        android:layout_marginTop="4dp"
+        app:layout_constraintEnd_toStartOf="@+id/colSpinner"
+        app:layout_constraintTop_toTopOf="@+id/colSpinner"
+        app:srcCompat="@drawable/grid" />
+
+    <ImageView
+        android:id="@+id/imageView7"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        android:layout_marginStart="32dp"
+        app:layout_constraintBottom_toTopOf="@+id/findPathButton"
+        app:layout_constraintEnd_toStartOf="@+id/obstaclesCountTextView"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:srcCompat="@drawable/wall" />
+
+    <TextView
+        android:id="@+id/obstaclesCountTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="4dp"
+        android:layout_marginTop="2dp"
+        android:text=": 0"
+        app:layout_constraintStart_toEndOf="@+id/imageView7"
+        app:layout_constraintTop_toTopOf="@+id/imageView7" />
+
+    <android.support.constraint.ConstraintLayout
+        android:id="@+id/gridConstraintLayout"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginBottom="8dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginStart="10dp"
+        android:layout_marginTop="32dp"
+        app:layout_constraintBottom_toTopOf="@+id/legendConstraintLayout"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/colSpinner"/>
+
+    <android.support.constraint.ConstraintLayout
+        android:id="@+id/legendConstraintLayout"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="24dp"
+        android:layout_marginEnd="24dp"
+        android:layout_marginStart="24dp"
+        app:layout_constraintBottom_toTopOf="@+id/imageView7"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <TextView
+            android:id="@+id/serverStatusTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:text="Server"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/emptyCellTextView" />
+
+        <TextView
+            android:id="@+id/bluetoothStatusTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="Bluetooth"
+            app:layout_constraintStart_toStartOf="@+id/serverStatusTextView"
+            app:layout_constraintTop_toBottomOf="@+id/serverStatusTextView" />
+
+        <TextView
+            android:id="@+id/emptyCellTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="16dp"
+            android:text="Empty"
+            app:layout_constraintEnd_toStartOf="@+id/verticalMiddleGuideline"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/endCellTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="19dp"
+            android:layout_marginEnd="8dp"
+            android:layout_marginTop="4dp"
+            android:text="End"
+            app:layout_constraintEnd_toStartOf="@+id/endImageView"
+            app:layout_constraintStart_toStartOf="@+id/startCellTextView"
+            app:layout_constraintTop_toBottomOf="@+id/startCellTextView" />
+
+        <TextView
+            android:id="@+id/startCellTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
+            android:text="Start"
+            app:layout_constraintEnd_toStartOf="@+id/startImageView"
+            app:layout_constraintTop_toTopOf="@+id/emptyCellTextView" />
+
+        <TextView
+            android:id="@+id/obstacleCellTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="Obstacle"
+            app:layout_constraintStart_toStartOf="@+id/emptyCellTextView"
+            app:layout_constraintTop_toBottomOf="@+id/emptyCellTextView" />
+
+        <ImageView
+            android:id="@+id/obstacleImageView"
+            android:layout_width="15dp"
+            android:layout_height="15dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="4dp"
+            app:layout_constraintStart_toEndOf="@+id/obstacleCellTextView"
+            app:layout_constraintTop_toTopOf="@+id/obstacleCellTextView"
+            app:srcCompat="@drawable/red_button" />
+
+        <ImageView
+            android:id="@+id/bluetoothImageView"
+            android:layout_width="15dp"
+            android:layout_height="15dp"
+            app:srcCompat="@drawable/red_button"
+            tools:layout_editor_absoluteX="77dp"
+            tools:layout_editor_absoluteY="26dp" />
+
+        <ImageView
+            android:id="@+id/emptyImageView"
+            android:layout_width="15dp"
+            android:layout_height="15dp"
+            android:layout_marginTop="4dp"
+            app:layout_constraintStart_toStartOf="@+id/obstacleImageView"
+            app:layout_constraintTop_toTopOf="@+id/emptyCellTextView"
+            app:srcCompat="@drawable/cell_default_button" />
+
+        <ImageView
+            android:id="@+id/startImageView"
+            android:layout_width="15dp"
+            android:layout_height="15dp"
+            android:layout_marginTop="4dp"
+            app:layout_constraintEnd_toEndOf="@+id/endImageView"
+            app:layout_constraintTop_toTopOf="@+id/startCellTextView"
+            app:srcCompat="@drawable/start_button" />
+
+        <ImageView
+            android:id="@+id/endImageView"
+            android:layout_width="15dp"
+            android:layout_height="15dp"
+            android:layout_marginEnd="24dp"
+            android:layout_marginTop="4dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/endCellTextView"
+            app:srcCompat="@drawable/end_button" />
+
+        <android.support.constraint.Guideline
+            android:id="@+id/verticalMiddleGuideline"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintGuide_percent="0.5" />
+
+    </android.support.constraint.ConstraintLayout>
+
+    <Button
+        android:id="@+id/pingButton"
+        style="@android:style/Widget.Material.Button.Colored"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="32dp"
+        android:layout_marginStart="32dp"
+        android:text="Ping"
+        app:layout_constraintBaseline_toBaselineOf="@+id/resetButton"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/resetButton" />
+
+</android.support.constraint.ConstraintLayout>

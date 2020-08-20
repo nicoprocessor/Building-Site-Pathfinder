@@ -1,0 +1,44 @@
+<resources>
+    <!--General strings-->
+    <string name="app_name">Building Site Pathfinder</string>
+    <string name="width_label">Width</string>
+    <string name="height_label">Height</string>
+    <string name="solve">Find Path</string>
+    <string name="solve_maze">Solve Maze</string>
+    <string name="reset">Reset</string>
+    <string name="stop">STOP</string>
+    <string name="status">Status</string>
+    <string name="title_activity_home">Home</string>
+    <string name="ok">OK</string>
+    <string name="understand">I understand</string>
+    <string name="cancel">Cancel</string>
+
+    <!--Maze issues-->
+    <string name="dialog_title_starting_orientation">Choose the starting orientation</string>
+    <string name="dialog_title_missing_required_cell">Required cell missing</string>
+    <string name="dialog_message_missing_required_cell">Looks like you forgot to provide start or end cells</string>
+
+    <!--Connectivity-->
+    <string name="dialog_message_enable_connectivity">Looks like Bluetooth or WiFi is not enabled. Do you want to enable it?</string>
+    <string name="dialog_title_enable_connectivity">Enable Connectivity?</string>
+    <string name="dialog_message_WiFi_issue">There was an unexpected error while enabling the WiFi module. Try doing it manually.</string>
+    <string name="dialog_title_WiFi_issue">Oops!</string>
+
+    <!--Arrays and constants-->
+    <string name="default_size">5</string>
+    <string-array name="size_array">
+        <item>3</item>
+        <item>4</item>
+        <item>5</item>
+        <item>6</item>
+        <item>7</item>
+        <item>8</item>
+        <item>9</item>
+    </string-array>
+    <string-array name="orientations">
+        <item>North</item>
+        <item>East</item>
+        <item>South</item>
+        <item>West</item>
+    </string-array>
+</resources>
