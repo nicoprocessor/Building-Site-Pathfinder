@@ -124,7 +124,7 @@ public class SetupActivity extends AppCompatActivity {
 
         // Find maze solution
         findPathBtn.setOnClickListener(v -> {
-            String mazeInstance = SetupActivity.this.gridManager.gridToASCIImap();
+            String mazeInstance = SetupActivity.this.gridManager.convertToMazeMap();
 
             if (mazeInstance.length() == 0) {
                 askUserToFixMazeDialog();

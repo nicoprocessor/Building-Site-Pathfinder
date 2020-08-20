@@ -5,5 +5,4 @@ package com.unibs.buildingsitepathfinder;
  */
 public class BluetoothConnection {
 
-
 }

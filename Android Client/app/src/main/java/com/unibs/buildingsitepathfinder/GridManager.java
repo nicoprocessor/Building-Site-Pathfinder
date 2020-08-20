@@ -9,17 +9,15 @@ import android.widget.TextView;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-/**
- * This class provides a set of methods to control the MazeGrid, update buttons and views and compute
- */
 public class GridManager {
-    // private final String[] directions = {"N", "E", "S", "W"};
+    private final String[] directions = {"N", "E", "S", "W"};
 
     private ArrayList<CustomGridCellButton> map;
     private int size;
     private int obstacles;
     private boolean isStartSet;
     private boolean isEndSet;
+    private HashMap<String, String> conversionMap;
 
     private CustomGridCellButton startButton;
     private CustomGridCellButton endButton;
@@ -27,8 +25,8 @@ public class GridManager {
     private TextView obstaclesCounter, robotPosition, targetPosition;
 
 
-    GridManager(ArrayList<CustomGridCellButton> gridButtons, ConstraintLayout grid, int size, TextView obstaclesCounter,
-                TextView robotPosition, TextView targetPosition) {
+    public GridManager(ArrayList<CustomGridCellButton> gridButtons, ConstraintLayout grid, int size, TextView obstaclesCounter,
+                       TextView robotPosition, TextView targetPosition) {
         this.isEndSet = false;
         this.isStartSet = false;
         this.map = gridButtons;
@@ -45,20 +43,20 @@ public class GridManager {
         this.obstaclesCounter.setText(String.valueOf(this.obstacles));
 
         //Conversion map init
-        HashMap<String, String> conversionMap = new HashMap<>();
-        conversionMap.put("Empty", "_");
-        conversionMap.put("Obstacle", "X");
-        conversionMap.put("Start", "S");
-        conversionMap.put("End", "E");
+        this.conversionMap = new HashMap<>();
+        this.conversionMap.put("Empty", "_");
+        this.conversionMap.put("Obstacle", "X");
+        this.conversionMap.put("Start", "S");
+        this.conversionMap.put("End", "E");
     }
 
     /**
-     * Changes the state of a button when pressed and updates its view
+     * Changes the state of a button according to a FSM
      *
-     * @param cb the button that has been pressed
+     * @param cb the button that had been pressed
      */
     @SuppressLint("SetTextI18n")
-    void changeButtonState(CustomGridCellButton cb) {
+    public void changeButtonState(CustomGridCellButton cb) {
         switch (cb.getStatus()) {
             case "Empty":  //Empty -> Obstacle
                 cb.setStatus("Obstacle");
@@ -111,11 +109,10 @@ public class GridManager {
      * @param mazeSolution        the computed solution plan
      * @param startingOrientation the starting orientation of the robot
      */
-    void solutionToGridButtons(String mazeSolution, String startingOrientation) {
+    public void solutionToGridButtons(String mazeSolution, String startingOrientation) {
 
         char currentOrientation = startingOrientation.charAt(0);
-        CustomGridCellButton currentButton;
-        currentButton = this.getStartButton();
+        CustomGridCellButton currentButton = this.getStartButton();
         Log.d("Conversion", "Maze solution: " + mazeSolution);
 
         Log.d("Conversion", "Starting button id: " + this.getStartButton().getId());
@@ -150,13 +147,13 @@ public class GridManager {
     /**
      * Evaluates the next step of the solution plan
      *
-     * @param currentButton      the current position of the agent
-     * @param currentOrientation the current orientation of the agent
+     * @param currentButton      the current position
+     * @param currentOrientation the current orientation
      * @return the next button of the solution plan
      */
     private CustomGridCellButton nextButton(CustomGridCellButton currentButton, char currentOrientation) {
-//        int currentX = currentButton.getCoordinates().x;
-//        int currentY = currentButton.getCoordinates().y;
+        int currentX = currentButton.getCoordinates().x;
+        int currentY = currentButton.getCoordinates().y;
         int currentButtonIndex = currentButton.getId();
 
         switch (currentOrientation) {
@@ -168,20 +165,16 @@ public class GridManager {
                 return this.map.get(currentButtonIndex + this.size);
             case 'W':
                 return this.map.get(currentButtonIndex - 1);
-            default:
-                return null;
         }
+        return null;
     }
 
     /**
-     * Compute the agent orientation after the rotation
-     *
      * @param previousOrientation the previous orientation
      * @param action              the direction of the rotation
-     * @return the new orientation after the rotation or throws an exception if something went wrong
-     * @throws IllegalArgumentException if the action symbol is not recognized
+     * @return the new orientation
      */
-    private char rotation(char previousOrientation, char action) throws IllegalArgumentException {
+    private char rotation(char previousOrientation, char action) {
         if (action == '+') {
             switch (previousOrientation) {
                 case 'N':
@@ -205,17 +198,17 @@ public class GridManager {
                     return 'S';
             }
         }
-        throw new IllegalArgumentException();
+        return ' ';
     }
 
 
     /**
      * Converts the grid of buttons to maze string
      *
-     * @return the maze converted to ASCII string format, comprehensible by the maze solver on the server.
-     * For instance
+     * @return the maze converted to string format,
+     * comprehensible by the maze solver on the server
      */
-    String gridToASCIImap() {
+    public String convertToMazeMap() {
         if (!this.isComplete())
             return "";
 
@@ -249,40 +242,6 @@ public class GridManager {
         return sb.toString();
     }
 
-
-    /**
-     * Displays the agent starting orientation on the grid
-     *
-     * @param orientation the staring orientation of the agent
-     * @param viewId the ID of the starting button
-     * @throws IllegalStateException if something is wrong with the orientation
-     */
-    void displayStartingOrientation(String orientation, int viewId) throws IllegalStateException{
-        View sb = this.gridView.findViewById(viewId);
-
-        switch (orientation) {
-            case "North":
-                sb.setBackgroundResource(R.drawable.arrow_up_bold_box_outline);
-                break;
-            case "South":
-                sb.setBackgroundResource(R.drawable.arrow_down_bold_box_outline);
-                break;
-            case "East":
-                sb.setBackgroundResource(R.drawable.arrow_right_bold_box_outline);
-                break;
-            case "West":
-                sb.setBackgroundResource(R.drawable.arrow_left_bold_box_outline);
-                break;
-            default:
-                throw new IllegalStateException();
-        }
-    }
-
-    /**
-     * Check if the maze grid has both a beginning cell and an ending cell
-     *
-     * @return true if the maze is complete, otherwise false
-     */
     private boolean isComplete() {
         return this.isEndSet() && this.isStartSet();
     }
@@ -312,6 +271,20 @@ public class GridManager {
         return null;
     }
 
+    public void displayStartingOrientation(String orientation, int viewId) {
+        View sb = this.gridView.findViewById(viewId);
+
+        if (orientation.equals("North"))
+            sb.setBackgroundResource(R.drawable.arrow_up_bold_box_outline);
+        else if (orientation.equals("South"))
+            sb.setBackgroundResource(R.drawable.arrow_down_bold_box_outline);
+        else if (orientation.equals("East"))
+            sb.setBackgroundResource(R.drawable.arrow_right_bold_box_outline);
+        else if (orientation.equals("West"))
+            sb.setBackgroundResource(R.drawable.arrow_left_bold_box_outline);
+    }
+
+    //Getter & setters
     public int getSize() {
         return size;
     }
