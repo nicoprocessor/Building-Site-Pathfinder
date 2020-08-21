@@ -2,8 +2,8 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/Building-Site_PathFinder-AndroidClient-master.iml" filepath="$PROJECT_DIR$/Building-Site_PathFinder-AndroidClient-master.iml" />
-      <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/Android_Client.iml" filepath="$PROJECT_DIR$/.idea/modules/Android_Client.iml" group="Android_Client" />
+      <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" group="Android Client/app" />
     </modules>
   </component>
 </project>
