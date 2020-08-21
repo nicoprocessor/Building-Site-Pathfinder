@@ -85,8 +85,8 @@ public class SetupActivity extends AppCompatActivity {
 
                 //TODO same for the bluetooth manager
                 if (pingRobot())
-                    serverConnectionIcon.setImageResource(R.drawable.bluetooth_on);
-                else serverConnectionIcon.setImageResource(R.drawable.bluetooth_off);
+                    bluetoothConnectionIcon.setImageResource(R.drawable.bluetooth_on);
+                else bluetoothConnectionIcon.setImageResource(R.drawable.bluetooth_off);
             }
         }, 0, CONNECTION_CHECK_RATE);
 
@@ -125,14 +125,14 @@ public class SetupActivity extends AppCompatActivity {
             }
 
             //TODO ping robot via Bluetooth
-            if (pingServer()) {
+            if (pingRobot()) {
                 Toast.makeText(this.getApplicationContext(),
-                        "The server is online!", Toast.LENGTH_SHORT).show();
-                serverConnectionIcon.setImageResource(R.drawable.bluetooth_on);
+                        "The robot is alive!", Toast.LENGTH_SHORT).show();
+                bluetoothConnectionIcon.setImageResource(R.drawable.bluetooth_on);
             } else {
                 Toast.makeText(this.getApplicationContext(),
-                        "Server unreachable!", Toast.LENGTH_SHORT).show();
-                serverConnectionIcon.setImageResource(R.drawable.bluetooth_off);
+                        "Robot unreachable!", Toast.LENGTH_SHORT).show();
+                bluetoothConnectionIcon.setImageResource(R.drawable.bluetooth_off);
             }
         });
 
