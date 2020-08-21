@@ -193,3 +193,6 @@ obj/
 
 ### Arduino ###
 .vscode/
+
+Android Client/app/proguard-rules.pro
+*.bat
