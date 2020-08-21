@@ -16,6 +16,7 @@
     <string name="empty_value">Empty</string>
     <string name="default_content">Missing content</string>
     <string name="ping">Ping</string>
+    <string name="test_connection">Connection</string>
     <string name="start">Start</string>
 
     <!--Maze issues-->
@@ -48,4 +49,10 @@
         <item>South</item>
         <item>West</item>
     </string-array>
+
+    <!--    Orientation-->
+    <string name="north">North</string>
+    <string name="south">South</string>
+    <string name="east">East</string>
+    <string name="west">West</string>
 </resources>

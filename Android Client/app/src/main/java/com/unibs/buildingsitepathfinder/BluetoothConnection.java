@@ -5,4 +5,19 @@ package com.unibs.buildingsitepathfinder;
  */
 public class BluetoothConnection {
 
+    BluetoothConnection() {
+        super();
+    }
+
+    //TODO ping robot
+    public boolean pingRobot() {
+        return true;
+    }
+
+    public boolean sendString() {
+        return false;
+    }
+
+    //Getters and setters
+
 }

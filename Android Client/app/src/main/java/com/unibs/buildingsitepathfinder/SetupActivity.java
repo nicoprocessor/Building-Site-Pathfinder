@@ -8,11 +8,11 @@ import android.graphics.Point;
 import android.net.ConnectivityManager;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.constraint.ConstraintLayout;
 import android.support.constraint.ConstraintSet;
 import android.support.v7.app.AppCompatActivity;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.Button;
@@ -22,7 +22,10 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class SetupActivity extends AppCompatActivity {
     //    private final int maxRows = 9;
@@ -46,6 +49,8 @@ public class SetupActivity extends AppCompatActivity {
     private ConstraintLayout grid;
     private GridManager gridManager;
     private Spinner colSpinner;
+    private Runnable connectionCheck;
+//    private BigInteger counter;
 
 
     @Override
@@ -56,6 +61,20 @@ public class SetupActivity extends AppCompatActivity {
 
         // Init serverConnection
         serverConnection = new ServerConnection(serverURL, this.getApplicationContext(), this);
+
+//        counter = 1;
+//
+//        Timer t = new Timer();
+//        t.scheduleAtFixedRate(new TimerTask() {
+//
+//            @Override
+//            public void run() {
+//                Toast.makeText(SetupActivity.this.getApplicationContext(),
+//                        "Faking test connection!", Toast.LENGTH_SHORT).show();
+//                counter++;
+//            }
+//
+//        }, 0, 10000);  //It will be repeated every 10 seconds
 
         // Layout components init
         findPathBtn = this.findViewById(R.id.findPathButton);
@@ -98,14 +117,28 @@ public class SetupActivity extends AppCompatActivity {
         });
 
 
-        // Send ping to the server
+//         Send ping to the server and the robot
         pingBtn.setOnClickListener(v -> {
-            if (pingServer())
+            if (pingServer()) {
                 Toast.makeText(this.getApplicationContext(),
                         "The server is online!", Toast.LENGTH_SHORT).show();
-            else
+                serverConnectionIcon.setImageResource(R.drawable.server_network_on);
+            } else {
                 Toast.makeText(this.getApplicationContext(),
                         "Server unreachable!", Toast.LENGTH_SHORT).show();
+                serverConnectionIcon.setImageResource(R.drawable.server_network_off);
+            }
+
+            //TODO ping robot via Bluetooth
+            if (pingServer()) {
+                Toast.makeText(this.getApplicationContext(),
+                        "The server is online!", Toast.LENGTH_SHORT).show();
+                serverConnectionIcon.setImageResource(R.drawable.bluetooth_on);
+            } else {
+                Toast.makeText(this.getApplicationContext(),
+                        "Server unreachable!", Toast.LENGTH_SHORT).show();
+                serverConnectionIcon.setImageResource(R.drawable.bluetooth_off);
+            }
         });
 
 
@@ -115,15 +148,14 @@ public class SetupActivity extends AppCompatActivity {
             grid.removeAllViews();
 
             //Reset view
-            ConstraintSet constraints1 = repaintGrid(size, size, grid, gridManager);
-            constraints1.applyTo(grid);
+            ConstraintSet cs = repaintGrid(size, size, grid, gridManager);
+            cs.applyTo(grid);
 
             //Reset gridManager with the new grid buttons
             SetupActivity.this.gridManager = resetGridManager(size);
 
-            //
-            constraints1 = repaintGrid(size, size, grid, gridManager);
-            constraints1.applyTo(grid);
+            cs = repaintGrid(size, size, grid, gridManager);
+            cs.applyTo(grid);
         });
 
 
@@ -135,7 +167,7 @@ public class SetupActivity extends AppCompatActivity {
                 askUserToFixMazeDialog();
             } else {
                 SetupActivity.this.setMazeInstance(mazeInstance);
-                startMazeSolutionRoutineDialog();
+                mazeSolutionRoutineDialog();
             }
         });
     }
@@ -235,29 +267,27 @@ public class SetupActivity extends AppCompatActivity {
      * Update the solution when the server is ready
      *
      * @param mazeSolution the computed maze solution
+     * @return true if the server was able to find the
      */
-    public void updateSolutionFromCallback(String mazeSolution) {
+    public boolean updateSolutionFromCallback(String mazeSolution) {
         this.mazeSolution = extractSolutionPlanFromJSON(mazeSolution);
-
-
-        Log.d("Bingo", this.mazeSolution);
-//        Log.d("Bingo", "Starting orientation: " + this.startingOrientation);
 
         if (this.mazeSolution.length() > 0) {
             if (this.mazeSolution.length() == 1) { //Impossible maze
-                Toast.makeText(this.getApplicationContext(), "Impossible maze!", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this.getApplicationContext(), "Impossible maze!", Toast.LENGTH_LONG).show();
             } else { // plan found
-                Toast.makeText(this.getApplicationContext(), "Solution found: " + this.mazeSolution, Toast.LENGTH_SHORT).show();
+                Toast.makeText(this.getApplicationContext(), "Solution found: " + this.mazeSolution, Toast.LENGTH_LONG).show();
                 SetupActivity.this.gridManager.solutionToGridButtons(this.mazeSolution, this.getStartingOrientation());
             }
         }
+        return this.mazeSolution.length() > 1;
     }
 
 
     /**
      * Asks user to select the starting orientation of the robot and sends the instance to the server
      */
-        private void startMazeSolutionRoutineDialog() {
+    private void mazeSolutionRoutineDialog() {
         builder = new AlertDialog.Builder(SetupActivity.this);
 
         builder.setTitle(R.string.dialog_title_starting_orientation)

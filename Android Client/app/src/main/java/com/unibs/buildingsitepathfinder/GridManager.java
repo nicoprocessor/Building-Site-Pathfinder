@@ -57,49 +57,50 @@ public class GridManager {
      */
     @SuppressLint("SetTextI18n")
     public void changeButtonState(CustomGridCellButton cb) {
-        switch (cb.getStatus()) {
-            case "Empty":  //Empty -> Obstacle
-                cb.setStatus("Obstacle");
-                this.obstacles++;
-                break;
+        if (cb.getOrientation().length() == 0)
+            switch (cb.getStatus()) {
+                case "Empty":  //Empty -> Obstacle
+                    cb.setStatus("Obstacle");
+                    this.obstacles++;
+                    break;
 
-            case "Solution":  // Solution -> Solution
-                //Do nothing, just repaint the view
-                break;
+                case "Solution":  // Solution -> Solution
+                    //Do nothing, just repaint the view
+                    break;
 
-            case "Obstacle":  //Obstacle -> End
-                if (this.isEndSet) {
-                    this.endButton.setStatus("Empty");
-                    this.endButton.repaint(this.gridView.getViewById(endButton.getId()));
-                }
+                case "Obstacle":  //Obstacle -> End
+                    if (this.isEndSet) {
+                        this.endButton.setStatus("Empty");
+                        this.endButton.repaint(this.gridView.getViewById(endButton.getId()));
+                    }
 
-                cb.setStatus("End");
-                this.isEndSet = true;
-                this.endButton = cb;
-                this.targetPosition.setText("[" + endButton.getCoordinates().x + "," + endButton.getCoordinates().y + "]");
-                this.obstacles--;
-                break;
+                    cb.setStatus("End");
+                    this.isEndSet = true;
+                    this.endButton = cb;
+                    this.targetPosition.setText("[" + endButton.getCoordinates().x + "," + endButton.getCoordinates().y + "]");
+                    this.obstacles--;
+                    break;
 
-            case "End":  //End -> Start
-                this.isEndSet = false;
+                case "End":  //End -> Start
+                    this.isEndSet = false;
 
-                if (this.isStartSet) {
-                    this.startButton.setStatus("Empty");
-                    this.startButton.repaint(this.gridView.getViewById(startButton.getId()));
+                    if (this.isStartSet) {
+                        this.startButton.setStatus("Empty");
+                        this.startButton.repaint(this.gridView.getViewById(startButton.getId()));
+                        this.robotPosition.setText("[?,?]");
+                    }
+                    cb.setStatus("Start");
+                    this.isStartSet = true;
+                    this.startButton = cb;
+                    this.robotPosition.setText("[" + startButton.getCoordinates().x + "," + startButton.getCoordinates().y + "]");
+                    break;
+
+                default:  //Start -> Empty
+                    cb.setStatus("Empty");
                     this.robotPosition.setText("[?,?]");
-                }
-                cb.setStatus("Start");
-                this.isStartSet = true;
-                this.startButton = cb;
-                this.robotPosition.setText("[" + startButton.getCoordinates().x + "," + startButton.getCoordinates().y + "]");
-                break;
-
-            default:  //Start -> Empty
-                cb.setStatus("Empty");
-                this.robotPosition.setText("[?,?]");
-                this.isStartSet = false;
-                break;
-        }
+                    this.isStartSet = false;
+                    break;
+            }
         this.obstaclesCounter.setText(String.valueOf(obstacles));
     }
 
@@ -113,34 +114,33 @@ public class GridManager {
 
         char currentOrientation = startingOrientation.charAt(0);
         CustomGridCellButton currentButton = this.getStartButton();
-        Log.d("Conversion", "Maze solution: " + mazeSolution);
 
-        Log.d("Conversion", "Starting button id: " + this.getStartButton().getId());
+        currentButton.setStatus("Start");
+        currentButton.setOrientation(startingOrientation);
+        currentButton.performClick(); // Since we set the orientation, the status won't change the
+        // status but we will perform a repaint
+
 
         for (int i = 0; i < mazeSolution.length(); i++) {
             char currentAction = mazeSolution.charAt(i);
-            Log.d("Conversion", "Current Action: " + currentAction);
 
             if (Character.isDigit(currentAction)) { //Move forward
                 for (int stepCounter = 0; stepCounter < Character.getNumericValue(currentAction); stepCounter++) {
-                    Log.d("Conversion", "Step counter: " + String.valueOf(stepCounter));
-                    if (currentButton.equals(this.getStartButton())) { //Do not repaint the first spot!
+                    assert currentButton != null;
+                    if (currentButton.equals(this.getStartButton())) {
                         currentButton = nextButton(this.getStartButton(), currentOrientation);
-                        Log.d("Conversion", "Current button @: " + currentButton.getCoordinates());
+
                     } else {
                         currentButton.setStatus("Solution");
-                        currentButton.performClick(); //Performing click we're implicitly repainting the view
+                        currentButton.performClick(); //Performing click we're automatically repainting the view
 
                         currentButton = nextButton(currentButton, currentOrientation);
-                        Log.d("Conversion", "Current button id: " + currentButton.getId());
 
                     }
                 }
             } else { //rotate, change currentOrientation according to the direction of the rotation
                 currentOrientation = rotation(currentOrientation, currentAction);
             }
-            Log.d("Conversion", "Current orientation @: " + currentOrientation);
-
         }
     }
 
