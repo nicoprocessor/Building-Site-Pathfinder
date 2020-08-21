@@ -12,6 +12,11 @@
     <string name="ok">OK</string>
     <string name="understand">I understand</string>
     <string name="cancel">Cancel</string>
+    <string name="bluetooth_label">Bluetooth</string>
+    <string name="empty_value">Empty</string>
+    <string name="default_content">Missing content</string>
+    <string name="ping">Ping</string>
+    <string name="start">Start</string>
 
     <!--Maze issues-->
     <string name="dialog_title_starting_orientation">Choose the starting orientation</string>
@@ -26,6 +31,8 @@
 
     <!--Arrays and constants-->
     <string name="default_size">5</string>
+    <string name="end">End</string>
+    <string name="server">Server</string>
     <string-array name="size_array">
         <item>3</item>
         <item>4</item>

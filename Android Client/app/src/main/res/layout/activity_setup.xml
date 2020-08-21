@@ -15,7 +15,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginEnd="4dp"
-        android:contentDescription=" "
+        android:contentDescription="@string/default_content"
         app:layout_constraintEnd_toStartOf="@+id/targetPositionTextView"
         app:layout_constraintTop_toTopOf="@+id/imageView7"
         app:srcCompat="@drawable/flag_checkered" />
@@ -24,8 +24,8 @@
         android:id="@+id/targetPositionTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="32dp"
         android:layout_marginTop="2dp"
+        android:layout_marginEnd="32dp"
         android:text=": [10,10]"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="@+id/imageView9" />
@@ -35,6 +35,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
+        android:contentDescription="@string/default_content"
         app:layout_constraintStart_toStartOf="@+id/resetButton"
         app:layout_constraintTop_toTopOf="@+id/imageView7"
         app:srcCompat="@drawable/robot" />
@@ -72,13 +73,14 @@
         style="@android:style/Widget.Material.Button.Colored"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="32dp"
         android:layout_marginStart="32dp"
-        android:onClick="sendInstance"
+        android:layout_marginEnd="32dp"
+        android:onClick=""
         android:text="@string/solve"
         app:layout_constraintBaseline_toBaselineOf="@+id/resetButton"
         app:layout_constraintEnd_toStartOf="@+id/resetButton"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintStart_toStartOf="parent"
+        tools:ignore="OnClick" />
 
     <Button
         android:id="@+id/resetButton"
@@ -92,14 +94,16 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintStart_toStartOf="parent"
+        tools:ignore="OnClick" />
 
     <ImageView
         android:id="@+id/colsImageView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="16dp"
         android:layout_marginTop="4dp"
+        android:layout_marginEnd="16dp"
+        android:contentDescription="@string/default_content"
         app:layout_constraintEnd_toStartOf="@+id/colSpinner"
         app:layout_constraintTop_toTopOf="@+id/colSpinner"
         app:srcCompat="@drawable/grid" />
@@ -108,8 +112,9 @@
         android:id="@+id/imageView7"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="16dp"
         android:layout_marginStart="32dp"
+        android:layout_marginBottom="16dp"
+        android:contentDescription="@string/default_content"
         app:layout_constraintBottom_toTopOf="@+id/findPathButton"
         app:layout_constraintEnd_toStartOf="@+id/obstaclesCountTextView"
         app:layout_constraintHorizontal_bias="0.5"
@@ -130,34 +135,47 @@
         android:id="@+id/gridConstraintLayout"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:layout_marginBottom="8dp"
-        android:layout_marginEnd="16dp"
-        android:layout_marginStart="10dp"
+        android:layout_marginStart="16dp"
         android:layout_marginTop="32dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="8dp"
         app:layout_constraintBottom_toTopOf="@+id/legendConstraintLayout"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/colSpinner"/>
+        app:layout_constraintTop_toBottomOf="@+id/colSpinner">
+
+    </android.support.constraint.ConstraintLayout>
 
     <android.support.constraint.ConstraintLayout
         android:id="@+id/legendConstraintLayout"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="24dp"
-        android:layout_marginEnd="24dp"
         android:layout_marginStart="24dp"
+        android:layout_marginEnd="24dp"
+        android:layout_marginBottom="24dp"
         app:layout_constraintBottom_toTopOf="@+id/imageView7"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent">
+
+        <ImageView
+            android:id="@+id/serverStatusImageView"
+            android:layout_width="15dp"
+            android:layout_height="15dp"
+            android:layout_marginTop="4dp"
+            android:contentDescription="@string/default_content"
+            app:layout_constraintStart_toStartOf="@+id/bluetoothStatusImageView"
+            app:layout_constraintTop_toTopOf="@+id/serverStatusTextView"
+            app:srcCompat="@drawable/server_network_off" />
 
         <TextView
             android:id="@+id/serverStatusTextView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
-            android:text="Server"
+            android:text="@string/server"
+            android:textSize="14sp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="@+id/emptyCellTextView" />
 
@@ -166,7 +184,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
-            android:text="Bluetooth"
+            android:text="@string/bluetooth_label"
+            android:textSize="14sp"
             app:layout_constraintStart_toStartOf="@+id/serverStatusTextView"
             app:layout_constraintTop_toBottomOf="@+id/serverStatusTextView" />
 
@@ -174,8 +193,8 @@
             android:id="@+id/emptyCellTextView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="16dp"
-            android:text="Empty"
+            android:text="@string/empty_value"
+            android:textSize="14sp"
             app:layout_constraintEnd_toStartOf="@+id/verticalMiddleGuideline"
             app:layout_constraintTop_toTopOf="parent" />
 
@@ -183,9 +202,10 @@
             android:id="@+id/endCellTextView"
             android:layout_width="wrap_content"
             android:layout_height="19dp"
-            android:layout_marginEnd="8dp"
             android:layout_marginTop="4dp"
-            android:text="End"
+            android:layout_marginEnd="8dp"
+            android:text="@string/end"
+            android:textSize="14sp"
             app:layout_constraintEnd_toStartOf="@+id/endImageView"
             app:layout_constraintStart_toStartOf="@+id/startCellTextView"
             app:layout_constraintTop_toBottomOf="@+id/startCellTextView" />
@@ -195,7 +215,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginEnd="8dp"
-            android:text="Start"
+            android:text="@string/start"
+            android:textSize="14sp"
             app:layout_constraintEnd_toStartOf="@+id/startImageView"
             app:layout_constraintTop_toTopOf="@+id/emptyCellTextView" />
 
@@ -205,6 +226,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
             android:text="Obstacle"
+            android:textSize="14sp"
             app:layout_constraintStart_toStartOf="@+id/emptyCellTextView"
             app:layout_constraintTop_toBottomOf="@+id/emptyCellTextView" />
 
@@ -219,18 +241,11 @@
             app:srcCompat="@drawable/red_button" />
 
         <ImageView
-            android:id="@+id/bluetoothImageView"
-            android:layout_width="15dp"
-            android:layout_height="15dp"
-            app:srcCompat="@drawable/red_button"
-            tools:layout_editor_absoluteX="77dp"
-            tools:layout_editor_absoluteY="26dp" />
-
-        <ImageView
             android:id="@+id/emptyImageView"
             android:layout_width="15dp"
             android:layout_height="15dp"
             android:layout_marginTop="4dp"
+            android:contentDescription="@string/default_content"
             app:layout_constraintStart_toStartOf="@+id/obstacleImageView"
             app:layout_constraintTop_toTopOf="@+id/emptyCellTextView"
             app:srcCompat="@drawable/cell_default_button" />
@@ -240,6 +255,7 @@
             android:layout_width="15dp"
             android:layout_height="15dp"
             android:layout_marginTop="4dp"
+            android:contentDescription="@string/default_content"
             app:layout_constraintEnd_toEndOf="@+id/endImageView"
             app:layout_constraintTop_toTopOf="@+id/startCellTextView"
             app:srcCompat="@drawable/start_button" />
@@ -248,8 +264,9 @@
             android:id="@+id/endImageView"
             android:layout_width="15dp"
             android:layout_height="15dp"
-            android:layout_marginEnd="24dp"
             android:layout_marginTop="4dp"
+            android:layout_marginEnd="24dp"
+            android:contentDescription="@string/default_content"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="@+id/endCellTextView"
             app:srcCompat="@drawable/end_button" />
@@ -259,7 +276,18 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            app:layout_constraintGuide_percent="0.5" />
+            app:layout_constraintGuide_percent="0.5041322" />
+
+        <ImageView
+            android:id="@+id/bluetoothStatusImageView"
+            android:layout_width="15dp"
+            android:layout_height="15dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="4dp"
+            android:contentDescription="@string/default_content"
+            app:layout_constraintStart_toEndOf="@+id/bluetoothStatusTextView"
+            app:layout_constraintTop_toTopOf="@+id/bluetoothStatusTextView"
+            app:srcCompat="@drawable/bluetooth_off" />
 
     </android.support.constraint.ConstraintLayout>
 
@@ -268,9 +296,9 @@
         style="@android:style/Widget.Material.Button.Colored"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="32dp"
         android:layout_marginStart="32dp"
-        android:text="Ping"
+        android:layout_marginEnd="32dp"
+        android:text="@string/ping"
         app:layout_constraintBaseline_toBaselineOf="@+id/resetButton"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/resetButton" />

@@ -105,7 +105,7 @@ public class ServerConnection {
             }
         }
 
-//        Log.d("Request", "Sending request params: " + sb.toString());
+        Log.d("Requests", "Sending request params: " + sb.toString());
         return sb.toString();
     }
 

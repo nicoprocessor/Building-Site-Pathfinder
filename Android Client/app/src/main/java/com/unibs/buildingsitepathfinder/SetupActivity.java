@@ -16,6 +16,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -28,6 +29,7 @@ public class SetupActivity extends AppCompatActivity {
 //    private final int maxCols = 9;
     private final int defaultSize = 5;
     private final String defaultStartingOrientation = "North";
+    // This shouldn't be here but I'll leave it for quick testing
     private final String serverURL = "https://flask-maze-solver.herokuapp.com/";
 
     private ArrayList<CustomGridCellButton> gridButtons;
@@ -38,6 +40,7 @@ public class SetupActivity extends AppCompatActivity {
 
     //Visual components
     private Button findPathBtn, resetBtn, pingBtn;
+    private ImageView serverConnectionIcon, bluetoothConnectionIcon;
     private TextView obstaclesCounter, startPosition, targetPosition;
     private AlertDialog.Builder builder;
     private ConstraintLayout grid;
@@ -61,6 +64,8 @@ public class SetupActivity extends AppCompatActivity {
         obstaclesCounter = this.findViewById(R.id.obstaclesCountTextView);
         startPosition = this.findViewById(R.id.robotPositionTextView);
         targetPosition = this.findViewById(R.id.targetPositionTextView);
+        serverConnectionIcon = this.findViewById(R.id.serverStatusImageView);
+        bluetoothConnectionIcon = this.findViewById(R.id.bluetoothStatusImageView);
 
         colSpinner = findViewById(R.id.colSpinner);
         colSpinner.setSelection(defaultSize - 2);
