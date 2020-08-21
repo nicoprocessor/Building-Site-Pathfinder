@@ -47,7 +47,7 @@ public class CustomGridCellButton extends Button implements View.OnClickListener
 
     @Override
     public void onClick(View v) {
-        gridManager.changeButtonState(this);
+        this.gridManager.changeButtonState(this);
         repaint(v);
     }
 
