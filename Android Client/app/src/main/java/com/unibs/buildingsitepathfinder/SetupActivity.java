@@ -35,6 +35,7 @@ public class SetupActivity extends AppCompatActivity {
     private ArrayList<CustomGridCellButton> gridButtons;
     private String startingOrientation;
     private ServerConnection serverConnection;
+    private BluetoothConnection bluetoothConnection;
     private String mazeInstance;
     private String mazeSolution;
 
@@ -62,19 +63,23 @@ public class SetupActivity extends AppCompatActivity {
         targetPosition = this.findViewById(R.id.targetPositionTextView);
         serverConnectionIcon = this.findViewById(R.id.serverStatusImageView);
         bluetoothConnectionIcon = this.findViewById(R.id.bluetoothStatusImageView);
-
         colSpinner = findViewById(R.id.colSpinner);
         colSpinner.setSelection(DEFAULT_SIZE - 2);
-
         grid = findViewById(R.id.gridConstraintLayout);
 
-        //Ask the user to enable WiFi and Bluetooth
-        if (!isBluetoothEnabled() || !isWiFiEnabled()) {
-            askEnableConnectivityDialog(isWiFiEnabled(), isBluetoothEnabled());
-        }
+
+
+        // Init Bluetooth connection
+        bluetoothConnection = new BluetoothConnection();
+        if (!bluetoothConnection.checkBluetoothAvailability()) askEnableBluetoothDialog();
+        // TODO
+
 
         // Init serverConnection
+        if (!isWiFiEnabled()) askEnableWiFiDialog();
         serverConnection = new ServerConnection(SERVER_URL, this.getApplicationContext(), this);
+
+        // Continuous scan
         Timer t = new Timer();
         t.scheduleAtFixedRate(new TimerTask() {
             @Override
@@ -83,7 +88,7 @@ public class SetupActivity extends AppCompatActivity {
                     serverConnectionIcon.setImageResource(R.drawable.server_network_on);
                 else serverConnectionIcon.setImageResource(R.drawable.server_network_off);
 
-                //TODO same for the bluetooth manager
+                //TODO same for the bluetooth manager(?)
                 if (pingRobot())
                     bluetoothConnectionIcon.setImageResource(R.drawable.bluetooth_on);
                 else bluetoothConnectionIcon.setImageResource(R.drawable.bluetooth_off);
@@ -346,8 +351,17 @@ public class SetupActivity extends AppCompatActivity {
      * @return true if Bluetooth module is connected, else false
      */
     private boolean isBluetoothEnabled() {
-        ConnectivityManager connMgr = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-        return connMgr != null && connMgr.getNetworkInfo(ConnectivityManager.TYPE_BLUETOOTH).isConnected();
+        BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+        if (bluetoothAdapter == null) {
+            // Device doesn't support Bluetooth
+        }
+        if (!bluetoothAdapter.isEnabled()) {
+            Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+            startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
+        }
+//        deprecated
+//        ConnectivityManager connMgr = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+//        return connMgr != null && connMgr.getNetworkInfo(ConnectivityManager.TYPE_BLUETOOTH).isConnected();
     }
 
     /**
@@ -360,30 +374,22 @@ public class SetupActivity extends AppCompatActivity {
         return connMgr != null && connMgr.getNetworkInfo(ConnectivityManager.TYPE_WIFI).isConnected();
     }
 
-    /**
-     * Ask the user to enable WiFi and Bluetooth module automatically.
-     */
-    private void askEnableConnectivityDialog(boolean isWiFiEnabled, boolean isBluetoothEnabled) {
-        final WifiManager wifiManager = (WifiManager) this.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
-        final BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
 
+    /**
+     * Ask the user to enable WiFi service automatically
+     */
+    private void askEnableWiFiDialog() {
+        final WifiManager wifiManager = (WifiManager) this.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
         builder = new AlertDialog.Builder(this.getActivity());
-        builder.setMessage(R.string.dialog_message_enable_connectivity);
+        builder.setMessage(R.string.dialog_message_enable_wifi);
         builder.setTitle(R.string.dialog_title_enable_connectivity);
 
         builder.setPositiveButton(R.string.ok, (dialog, id) -> {
-            if (!isWiFiEnabled) {
-                if (wifiManager != null) {
-                    wifiManager.setWifiEnabled(true);
-                    Toast.makeText(SetupActivity.this.getApplicationContext(), "Done!", Toast.LENGTH_SHORT).show();
-                } else {
-                    Toast.makeText(SetupActivity.this.getApplicationContext(), "WiFi not enabled!", Toast.LENGTH_SHORT).show();
-                }
-            }
-
-            if (!isBluetoothEnabled) {
-                mBluetoothAdapter.enable();
+            if (wifiManager != null) {
+                wifiManager.setWifiEnabled(true);
                 Toast.makeText(SetupActivity.this.getApplicationContext(), "Done!", Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(SetupActivity.this.getApplicationContext(), "Something went wrong! WiFi not enabled!", Toast.LENGTH_SHORT).show();
             }
         });
 
@@ -393,6 +399,15 @@ public class SetupActivity extends AppCompatActivity {
 
         AlertDialog dialog = builder.create();
         dialog.show();
+    }
+
+    /**
+     * Ask the user to enable Bluetooth service automatically
+     */
+    private void askEnableBluetoothDialog() {
+        boolean response = this.bluetoothConnection.requestBluetoothActivation();
+        if (response)
+            Toast.makeText(SetupActivity.this.getApplicationContext(), "Done!", Toast.LENGTH_SHORT).show();
     }
 
     /**

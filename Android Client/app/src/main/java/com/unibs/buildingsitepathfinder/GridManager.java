@@ -3,7 +3,6 @@ package com.unibs.buildingsitepathfinder;
 import android.annotation.SuppressLint;
 import android.support.constraint.ConstraintLayout;
 import android.util.Log;
-import android.view.View;
 import android.widget.TextView;
 
 import java.util.ArrayList;
@@ -25,8 +24,8 @@ public class GridManager {
     private TextView obstaclesCounter, robotPosition, targetPosition;
 
 
-    public GridManager(ArrayList<CustomGridCellButton> gridButtons, ConstraintLayout grid, int size, TextView obstaclesCounter,
-                       TextView robotPosition, TextView targetPosition) {
+    GridManager(ArrayList<CustomGridCellButton> gridButtons, ConstraintLayout grid, int size, TextView obstaclesCounter,
+                TextView robotPosition, TextView targetPosition) {
         this.isEndSet = false;
         this.isStartSet = false;
         this.map = gridButtons;
@@ -56,7 +55,7 @@ public class GridManager {
      * @param cb the button that had been pressed
      */
     @SuppressLint("SetTextI18n")
-    public void changeButtonState(CustomGridCellButton cb) {
+    void changeButtonState(CustomGridCellButton cb) {
         if (cb.getOrientation().length() == 0)
             switch (cb.getStatus()) {
                 case "Empty":  //Empty -> Obstacle
@@ -110,7 +109,7 @@ public class GridManager {
      * @param mazeSolution        the computed solution plan
      * @param startingOrientation the starting orientation of the robot
      */
-    public void solutionToGridButtons(String mazeSolution, String startingOrientation) {
+    void solutionToGridButtons(String mazeSolution, String startingOrientation) {
 
         char currentOrientation = startingOrientation.charAt(0);
         CustomGridCellButton currentButton = this.getStartButton();
@@ -208,7 +207,7 @@ public class GridManager {
      * @return the maze converted to string format,
      * comprehensible by the maze solver on the server
      */
-    public String convertToMazeMap() {
+    String convertToMazeMap() {
         if (!this.isComplete())
             return "";
 
@@ -263,7 +262,7 @@ public class GridManager {
         return false;
     }
 
-    public CustomGridCellButton getStartButton() {
+    CustomGridCellButton getStartButton() {
         for (CustomGridCellButton cb : this.map) {
             if (cb.getStatus().equals("Start"))
                 return cb;
@@ -271,25 +270,25 @@ public class GridManager {
         return null;
     }
 
-    public void displayStartingOrientation(String orientation, int viewId) {
-        View sb = this.gridView.findViewById(viewId);
-
-        if (orientation.equals("North"))
-            sb.setBackgroundResource(R.drawable.arrow_up_bold_box_outline);
-        else if (orientation.equals("South"))
-            sb.setBackgroundResource(R.drawable.arrow_down_bold_box_outline);
-        else if (orientation.equals("East"))
-            sb.setBackgroundResource(R.drawable.arrow_right_bold_box_outline);
-        else if (orientation.equals("West"))
-            sb.setBackgroundResource(R.drawable.arrow_left_bold_box_outline);
-    }
+//     void displayStartingOrientation(String orientation, int viewId) {
+//        View sb = this.gridView.findViewById(viewId);
+//
+//        if (orientation.equals("North"))
+//            sb.setBackgroundResource(R.drawable.arrow_up_bold_box_outline);
+//        else if (orientation.equals("South"))
+//            sb.setBackgroundResource(R.drawable.arrow_down_bold_box_outline);
+//        else if (orientation.equals("East"))
+//            sb.setBackgroundResource(R.drawable.arrow_right_bold_box_outline);
+//        else if (orientation.equals("West"))
+//            sb.setBackgroundResource(R.drawable.arrow_left_bold_box_outline);
+//    }
 
     //Getter & setters
-    public int getSize() {
+    int getSize() {
         return size;
     }
 
-    public void setSize(int size) {
+    void setSize(int size) {
         this.size = size;
     }
 }
