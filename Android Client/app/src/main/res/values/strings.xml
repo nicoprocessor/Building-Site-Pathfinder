@@ -16,6 +16,7 @@
     <string name="empty_value">Empty</string>
     <string name="default_content">Missing content</string>
     <string name="ping">Ping</string>
+    <string name="test_connection">Connection</string>
     <string name="start">Start</string>
 
     <!--Maze issues-->
@@ -25,6 +26,8 @@
 
     <!--Connectivity-->
     <string name="dialog_message_enable_connectivity">Looks like Bluetooth or WiFi is not enabled. Do you want to enable it?</string>
+    <string name="dialog_message_enable_wifi">Looks like WiFi service is not enabled. Do you want to enable it?</string>
+    <string name="dialog_message_enable_bluetooth">Looks like Bluetooth service is not enabled. Do you want to enable it?</string>
     <string name="dialog_title_enable_connectivity">Enable Connectivity?</string>
     <string name="dialog_message_WiFi_issue">There was an unexpected error while enabling the WiFi module. Try doing it manually.</string>
     <string name="dialog_title_WiFi_issue">Oops!</string>
@@ -48,4 +51,10 @@
         <item>South</item>
         <item>West</item>
     </string-array>
+
+    <!--    Orientation-->
+    <string name="north">North</string>
+    <string name="south">South</string>
+    <string name="east">East</string>
+    <string name="west">West</string>
 </resources>

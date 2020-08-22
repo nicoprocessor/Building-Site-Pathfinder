@@ -16,6 +16,8 @@ def solve():
 
     if 'ping' in args.keys():
         return jsonify({'response': 'pong'})
+    elif len(args.keys()) == 0:
+        return "The server is online!"
     else:
         maze = args['maze']
         starting_orientation = args['starting_orientation']

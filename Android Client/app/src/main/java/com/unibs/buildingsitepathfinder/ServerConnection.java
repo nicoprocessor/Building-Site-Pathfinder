@@ -24,7 +24,7 @@ public class ServerConnection {
     ServerConnection(String serverURL, Context context, SetupActivity parentActivity) {
         this.serverURL = serverURL;
         this.activityContext = context;
-        this.response = emptyResponsePlaceHolder;
+        this.response = String.valueOf(R.string.empty_value);
         this.parentActivity = parentActivity;
     }
 
@@ -64,11 +64,8 @@ public class ServerConnection {
 
         StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
                 response -> {
-//                    Log.d("Bingo params", response);
-
                     ServerConnection.this.parentActivity.updateSolutionFromCallback(response);
                 }, error -> Log.d("Volley", "ServerConnection error"));
-
         queue.add(stringRequest);
     }
 

@@ -12,7 +12,6 @@ import android.support.constraint.ConstraintLayout;
 import android.support.constraint.ConstraintSet;
 import android.support.v7.app.AppCompatActivity;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.Button;
@@ -23,18 +22,20 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class SetupActivity extends AppCompatActivity {
-    //    private final int maxRows = 9;
-//    private final int maxCols = 9;
-    private final int defaultSize = 5;
-    private final String defaultStartingOrientation = "North";
     // This shouldn't be here but I'll leave it for quick testing
-    private final String serverURL = "https://flask-maze-solver.herokuapp.com/";
+    private final String SERVER_URL = "https://flask-maze-solver.herokuapp.com/";
+    private final int DEFAULT_SIZE = 5;
+    private final String DEFAULT_STARTING_ORIENTATION = "North";
+    private final int CONNECTION_CHECK_RATE = 5000;
 
     private ArrayList<CustomGridCellButton> gridButtons;
     private String startingOrientation;
     private ServerConnection serverConnection;
+    private BluetoothConnection bluetoothConnection;
     private String mazeInstance;
     private String mazeSolution;
 
@@ -47,15 +48,11 @@ public class SetupActivity extends AppCompatActivity {
     private GridManager gridManager;
     private Spinner colSpinner;
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_setup);
         getWindow().getDecorView().setBackgroundColor(Color.WHITE);
-
-        // Init serverConnection
-        serverConnection = new ServerConnection(serverURL, this.getApplicationContext(), this);
 
         // Layout components init
         findPathBtn = this.findViewById(R.id.findPathButton);
@@ -66,22 +63,44 @@ public class SetupActivity extends AppCompatActivity {
         targetPosition = this.findViewById(R.id.targetPositionTextView);
         serverConnectionIcon = this.findViewById(R.id.serverStatusImageView);
         bluetoothConnectionIcon = this.findViewById(R.id.bluetoothStatusImageView);
-
         colSpinner = findViewById(R.id.colSpinner);
-        colSpinner.setSelection(defaultSize - 2);
-
+        colSpinner.setSelection(DEFAULT_SIZE - 2);
         grid = findViewById(R.id.gridConstraintLayout);
 
-        //Ask the user to enable WiFi and Bluetooth
-        if (!isBluetoothEnabled() || !isWiFiEnabled()) {
-            askEnableConnectivityDialog(isWiFiEnabled(), isBluetoothEnabled());
-        }
+
+
+        // Init Bluetooth connection
+        bluetoothConnection = new BluetoothConnection();
+        if (!bluetoothConnection.checkBluetoothAvailability()) askEnableBluetoothDialog();
+        // TODO
+
+
+        // Init serverConnection
+        if (!isWiFiEnabled()) askEnableWiFiDialog();
+        serverConnection = new ServerConnection(SERVER_URL, this.getApplicationContext(), this);
+
+        // Continuous scan
+        Timer t = new Timer();
+        t.scheduleAtFixedRate(new TimerTask() {
+            @Override
+            public void run() {
+                if (pingServer())
+                    serverConnectionIcon.setImageResource(R.drawable.server_network_on);
+                else serverConnectionIcon.setImageResource(R.drawable.server_network_off);
+
+                //TODO same for the bluetooth manager(?)
+                if (pingRobot())
+                    bluetoothConnectionIcon.setImageResource(R.drawable.bluetooth_on);
+                else bluetoothConnectionIcon.setImageResource(R.drawable.bluetooth_off);
+            }
+        }, 0, CONNECTION_CHECK_RATE);
+
 
         // Building the grid
-        ConstraintSet constraints = repaintGrid(defaultSize, defaultSize, grid, gridManager);
+        ConstraintSet constraints = repaintGrid(DEFAULT_SIZE, DEFAULT_SIZE, grid, gridManager);
         constraints.applyTo(grid);
-        this.startingOrientation = defaultStartingOrientation;
-        this.gridManager = new GridManager(gridButtons, grid, defaultSize, obstaclesCounter, startPosition, targetPosition);
+        this.startingOrientation = DEFAULT_STARTING_ORIENTATION;
+        this.gridManager = new GridManager(gridButtons, grid, DEFAULT_SIZE, obstaclesCounter, startPosition, targetPosition);
 
         //Implementing listeners
         colSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
@@ -98,14 +117,28 @@ public class SetupActivity extends AppCompatActivity {
         });
 
 
-        // Send ping to the server
+//         Send ping to the server and the robot
         pingBtn.setOnClickListener(v -> {
-            if (pingServer())
+            if (pingServer()) {
                 Toast.makeText(this.getApplicationContext(),
                         "The server is online!", Toast.LENGTH_SHORT).show();
-            else
+                serverConnectionIcon.setImageResource(R.drawable.server_network_on);
+            } else {
                 Toast.makeText(this.getApplicationContext(),
                         "Server unreachable!", Toast.LENGTH_SHORT).show();
+                serverConnectionIcon.setImageResource(R.drawable.server_network_off);
+            }
+
+            //TODO ping robot via Bluetooth
+            if (pingRobot()) {
+                Toast.makeText(this.getApplicationContext(),
+                        "The robot is alive!", Toast.LENGTH_SHORT).show();
+                bluetoothConnectionIcon.setImageResource(R.drawable.bluetooth_on);
+            } else {
+                Toast.makeText(this.getApplicationContext(),
+                        "Robot unreachable!", Toast.LENGTH_SHORT).show();
+                bluetoothConnectionIcon.setImageResource(R.drawable.bluetooth_off);
+            }
         });
 
 
@@ -115,15 +148,14 @@ public class SetupActivity extends AppCompatActivity {
             grid.removeAllViews();
 
             //Reset view
-            ConstraintSet constraints1 = repaintGrid(size, size, grid, gridManager);
-            constraints1.applyTo(grid);
+            ConstraintSet cs = repaintGrid(size, size, grid, gridManager);
+            cs.applyTo(grid);
 
             //Reset gridManager with the new grid buttons
             SetupActivity.this.gridManager = resetGridManager(size);
 
-            //
-            constraints1 = repaintGrid(size, size, grid, gridManager);
-            constraints1.applyTo(grid);
+            cs = repaintGrid(size, size, grid, gridManager);
+            cs.applyTo(grid);
         });
 
 
@@ -135,11 +167,10 @@ public class SetupActivity extends AppCompatActivity {
                 askUserToFixMazeDialog();
             } else {
                 SetupActivity.this.setMazeInstance(mazeInstance);
-                startMazeSolutionRoutineDialog();
+                mazeSolutionRoutineDialog();
             }
         });
     }
-
 
     /**
      * Rebuilds the grid at its default state, with the given dimension, and returns the
@@ -157,6 +188,7 @@ public class SetupActivity extends AppCompatActivity {
         DisplayMetrics dm = new DisplayMetrics();
         getWindowManager().getDefaultDisplay().getMetrics(dm);
 
+        // Crazy layout operations
         int screenWidth = dm.widthPixels;
         int screenHeight = dm.heightPixels;
         double marginToWidthRatio = 23.0 / 85.0;
@@ -175,9 +207,7 @@ public class SetupActivity extends AppCompatActivity {
                 cb.setId(viewIndex);
                 cb.setWidth(btnWidth);
                 cb.setHeight(btnHeight);
-//                cb.setText(String.valueOf(viewIndex));
                 cb.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
-
                 cb.setStatus("Empty");
 
                 chainIds[viewIndex] = cb.getId();
@@ -190,7 +220,6 @@ public class SetupActivity extends AppCompatActivity {
         constraints.clone(grid);
 
         int verticalMargin = (int) (btnWidth * marginToWidthRatio);
-        int horizontalMargin = verticalMargin;
 
         for (int currentId = 0; currentId < cols * rows; currentId++) {
             constraints.connect(
@@ -201,7 +230,7 @@ public class SetupActivity extends AppCompatActivity {
             constraints.connect(
                     grid.getViewById(currentId).getId(), ConstraintLayout.LayoutParams.LEFT,
                     grid.getId(), ConstraintLayout.LayoutParams.LEFT,
-                    horizontalMargin * ((currentId % cols) + 1) + btnWidth * (currentId % cols));
+                    verticalMargin * ((currentId % cols) + 1) + btnWidth * (currentId % cols));
         }
 
         //Update GridManager references
@@ -225,39 +254,35 @@ public class SetupActivity extends AppCompatActivity {
      * Send the current instance of the maze to the server if everything is connected.
      */
     private void sendMazeInstance() {
-        this.serverConnection.sendMazeInstance(
+        serverConnection.sendMazeInstance(
                 String.valueOf(this.startingOrientation.charAt(0)),
                 this.mazeInstance);
     }
-
 
     /**
      * Update the solution when the server is ready
      *
      * @param mazeSolution the computed maze solution
+     * @return true if the server was able to find the
      */
-    public void updateSolutionFromCallback(String mazeSolution) {
+    public boolean updateSolutionFromCallback(String mazeSolution) {
         this.mazeSolution = extractSolutionPlanFromJSON(mazeSolution);
-
-
-        Log.d("Bingo", this.mazeSolution);
-//        Log.d("Bingo", "Starting orientation: " + this.startingOrientation);
 
         if (this.mazeSolution.length() > 0) {
             if (this.mazeSolution.length() == 1) { //Impossible maze
-                Toast.makeText(this.getApplicationContext(), "Impossible maze!", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this.getApplicationContext(), "Impossible maze!", Toast.LENGTH_LONG).show();
             } else { // plan found
-                Toast.makeText(this.getApplicationContext(), "Solution found: " + this.mazeSolution, Toast.LENGTH_SHORT).show();
-                SetupActivity.this.gridManager.solutionToGridButtons(this.mazeSolution, this.getStartingOrientation());
+                Toast.makeText(this.getApplicationContext(), "Solution found: " + this.mazeSolution, Toast.LENGTH_LONG).show();
+                this.gridManager.solutionToGridButtons(this.mazeSolution, this.getStartingOrientation());
             }
         }
+        return this.mazeSolution.length() > 1;
     }
-
 
     /**
      * Asks user to select the starting orientation of the robot and sends the instance to the server
      */
-        private void startMazeSolutionRoutineDialog() {
+    private void mazeSolutionRoutineDialog() {
         builder = new AlertDialog.Builder(SetupActivity.this);
 
         builder.setTitle(R.string.dialog_title_starting_orientation)
@@ -326,8 +351,17 @@ public class SetupActivity extends AppCompatActivity {
      * @return true if Bluetooth module is connected, else false
      */
     private boolean isBluetoothEnabled() {
-        ConnectivityManager connMgr = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-        return connMgr != null && connMgr.getNetworkInfo(ConnectivityManager.TYPE_BLUETOOTH).isConnected();
+        BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+        if (bluetoothAdapter == null) {
+            // Device doesn't support Bluetooth
+        }
+        if (!bluetoothAdapter.isEnabled()) {
+            Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+            startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
+        }
+//        deprecated
+//        ConnectivityManager connMgr = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+//        return connMgr != null && connMgr.getNetworkInfo(ConnectivityManager.TYPE_BLUETOOTH).isConnected();
     }
 
     /**
@@ -342,29 +376,20 @@ public class SetupActivity extends AppCompatActivity {
 
 
     /**
-     * Ask the user to enable WiFi and Bluetooth module automatically.
+     * Ask the user to enable WiFi service automatically
      */
-    private void askEnableConnectivityDialog(boolean isWiFiEnabled, boolean isBluetoothEnabled) {
+    private void askEnableWiFiDialog() {
         final WifiManager wifiManager = (WifiManager) this.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
-        final BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-
         builder = new AlertDialog.Builder(this.getActivity());
-        builder.setMessage(R.string.dialog_message_enable_connectivity);
+        builder.setMessage(R.string.dialog_message_enable_wifi);
         builder.setTitle(R.string.dialog_title_enable_connectivity);
 
         builder.setPositiveButton(R.string.ok, (dialog, id) -> {
-            if (!isWiFiEnabled) {
-                if (wifiManager != null) {
-                    wifiManager.setWifiEnabled(true);
-                    Toast.makeText(SetupActivity.this.getApplicationContext(), "Done!", Toast.LENGTH_SHORT).show();
-                } else {
-                    Toast.makeText(SetupActivity.this.getApplicationContext(), "WiFi not enabled!", Toast.LENGTH_SHORT).show();
-                }
-            }
-
-            if (!isBluetoothEnabled) {
-                mBluetoothAdapter.enable();
+            if (wifiManager != null) {
+                wifiManager.setWifiEnabled(true);
                 Toast.makeText(SetupActivity.this.getApplicationContext(), "Done!", Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(SetupActivity.this.getApplicationContext(), "Something went wrong! WiFi not enabled!", Toast.LENGTH_SHORT).show();
             }
         });
 
@@ -376,6 +401,14 @@ public class SetupActivity extends AppCompatActivity {
         dialog.show();
     }
 
+    /**
+     * Ask the user to enable Bluetooth service automatically
+     */
+    private void askEnableBluetoothDialog() {
+        boolean response = this.bluetoothConnection.requestBluetoothActivation();
+        if (response)
+            Toast.makeText(SetupActivity.this.getApplicationContext(), "Done!", Toast.LENGTH_SHORT).show();
+    }
 
     /**
      * Extracts the string containing the computed plan from the JSON response

@@ -12,10 +12,11 @@ import android.widget.Button;
  */
 @SuppressLint("AppCompatCustomView")
 public class CustomGridCellButton extends Button implements View.OnClickListener {
-
     private Point coordinates;
     private String status;
     private GridManager gridManager;
+
+    private String orientation;
 
     public CustomGridCellButton(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
@@ -34,6 +35,7 @@ public class CustomGridCellButton extends Button implements View.OnClickListener
         init();
         this.gridManager = grid;
         this.status = "Empty";
+        this.orientation = "";
     }
 
     private void init() {
@@ -45,7 +47,7 @@ public class CustomGridCellButton extends Button implements View.OnClickListener
 
     @Override
     public void onClick(View v) {
-        gridManager.changeButtonState(this);
+        this.gridManager.changeButtonState(this);
         repaint(v);
     }
 
@@ -56,17 +58,35 @@ public class CustomGridCellButton extends Button implements View.OnClickListener
      */
     public void repaint(View v) {
         Button btn = (Button) v;
-//        btn.setText(this.getStatus());
 
         switch (this.status) {
             case "Empty":
                 btn.setBackgroundResource(R.drawable.cell_default_button);
                 break;
             case "Start":
-                btn.setBackgroundResource(R.drawable.start_button);
+                if (this.orientation.length() != 0) {
+                    switch (this.orientation) {
+                        // This is not good but I couldn't find any way around
+                        case "North":
+                            this.setBackgroundResource(R.drawable.arrow_up_bold_box_outline);
+                            break;
+                        case "South":
+                            this.setBackgroundResource(R.drawable.arrow_down_bold_box_outline);
+                            break;
+                        case "East":
+                            this.setBackgroundResource(R.drawable.arrow_right_bold_box_outline);
+                            break;
+                        case "West":
+                            this.setBackgroundResource(R.drawable.arrow_left_bold_box_outline);
+                            break;
+                        default:
+                            throw new IllegalStateException("Unexpected value: " + this.orientation);
+                    }
+                } else
+                    btn.setBackgroundResource(R.drawable.start_button);
                 break;
             case "Obstacle":
-                btn.setBackgroundResource(R.drawable.red_button);
+                btn.setBackgroundResource(R.drawable.obstacle_button);
                 break;
             case "End":
                 btn.setBackgroundResource(R.drawable.end_button);
@@ -78,6 +98,7 @@ public class CustomGridCellButton extends Button implements View.OnClickListener
     }
 
     //Getters & Setters
+
     public Point getCoordinates() {
         return coordinates;
     }
@@ -96,6 +117,14 @@ public class CustomGridCellButton extends Button implements View.OnClickListener
 
     public void setGridManager(GridManager gridManager) {
         this.gridManager = gridManager;
+    }
+
+    public String getOrientation() {
+        return this.orientation;
+    }
+
+    public void setOrientation(String orientation) {
+        this.orientation = orientation;
     }
 
     public void setStatus(String status) {
